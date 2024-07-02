@@ -2,9 +2,12 @@
 
 
 #include "Character/BaseCharacter.h"
+#include "Character/K_YGCharacterMovementComponent.h"
 
 // Sets default values
-ABaseCharacter::ABaseCharacter()
+// Change character movement component is base to custom.
+ABaseCharacter::ABaseCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UK_YGCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
