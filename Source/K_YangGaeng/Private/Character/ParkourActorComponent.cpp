@@ -512,3 +512,21 @@ void UParkourActorComponent::ParkourTimelineEnd()
 {
 
 }
+
+// Update Parkour Character Step 2. Get each curve's alpha data with parkour timeline progress position
+void UParkourActorComponent::GetParkourTimelineCurvesAlpha(const FParkourParams& InParkourParams, float& OutPositionAlpha, float& OutXYCorrectionAlpha, float& OutZCorrectionAlpha)
+{
+    //
+    float InTime = InParkourParams.StartingPosition + ParkourTimeline->GetPlaybackPosition();
+
+    //
+    FVector AlphaValues = InParkourParams.PositionAndCorrectionCurve->GetVectorValue(InTime);
+
+    OutPositionAlpha = AlphaValues.X;
+    OutXYCorrectionAlpha = AlphaValues.Y;
+    OutZCorrectionAlpha = AlphaValues.Z;
+}
+
+void UParkourActorComponent::GetLerpedCurrentPlayerTransform(const FTransform& ParkourStartOffset, const FTransform& ParkourAnimationOffset, const FTransform& ParkourActualOffset, FTransform& OutLerpedTarget)
+{
+}
