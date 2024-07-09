@@ -17,3 +17,6 @@ DECLARE_LOG_CATEGORY_EXTERN(K_YG, Log, All);
 
 // Assertion : 확인
 #define K_YG_CHECK(Expr, ...) {if(!(Expr)) { K_YG_UELOG(Error, TEXT("Assertion : %s"), TEXT("'"#Expr"'")); return __VA_ARGS__; }}
+
+// Simple Check : Not Assertion : 단순 조건문 확인 - return 코드 줄이는 매크로
+#define K_YG_SIMPLE_CHECK(Expr, ...) {if(!(Expr)) { K_YG_UELOG(Warning, TEXT("The function is pre-termination : %s"), TEXT("'"#Expr"'")); return __VA_ARGS__; }}
