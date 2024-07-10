@@ -166,9 +166,10 @@ public:
 	* @param OutParkourWallComponent - Wall which is climbed possible
 	* @param OutParkourType - Play different parkour animation from climbed height
 	*/
-	bool CheckParkourPossible(float& OutParkourHeight, FTransform& OutParkourWallTransform, UPrimitiveComponent*& OutParkourWallComponent, EParkourType& OutParkourType);
+	bool CheckParkourPossible(float& OutParkourHeight, FTransform& OutParkourTarget, UPrimitiveComponent*& OutParkourWallComponent, EParkourType& OutParkourType);
 
-	bool StartParkour(const float InParkourHeight, const FTransform InParkourWallTransform, const UPrimitiveComponent*& InParkourWallComponent, const EParkourType& InParkourType);
+	//
+	bool StartParkour(const float& InParkourHeight, const FTransform& InParkourTarget, UPrimitiveComponent*& InParkourWallComponent, const EParkourType& InParkourType);
 
 private:
 
@@ -215,19 +216,19 @@ private:
 	FParkourAssetSetting GetParkourAssetSetting(const EParkourType& InParkourType);
 
 	// Parkour wall change transform from world to local
-	FTransform ChangeParkourWallTransformWorldToLocal(const class UPrimitiveComponent* InComponent, FTransform& InTransform);
+	FTransform ChangeParkourWallTransformWorldToLocal(class UPrimitiveComponent* &InComponent, FTransform& InTransform);
 
 	// Return actual start parkour offset
-	FTransform GetActualStartParkourOffset(const FTransform& InTargetTransform);
+	FTransform GetActualStartParkourOffset();
 
 	// Return calculate parkour animation start offset
-	FTransform CalculateParkourAnimationStartOffset(const FParkourParams& InParkourParams, const FTransform& InTargetTransform);
+	FTransform CalculateParkourAnimationStartOffset();
 
 	// Start Parkour Step 6. Play parkour timeline
-	void PlayParkourTimeline(const FParkourParams& InParkourParams);
+	void PlayParkourTimeline();
 
 	// Start Parkour Step 7. Play parkour animation
-	bool PlayParkourAnimation(const FParkourParams& InParkourParams);
+	bool PlayParkourAnimation();
 
 	// ========== Parkour Timeline ==============
 
@@ -244,10 +245,15 @@ private:
 	// ======== Parkour Timeline Update =========
 
 	// Update Parkour Character Step 2. Get each curve's alpha data with parkour timeline progress position
-	void GetParkourTimelineCurvesAlpha(const FParkourParams& InParkourParams, float& OutPositionAlpha, float& OutXYCorrectionAlpha, float& OutZCorrectionAlpha);
+	void GetParkourTimelineCurvesAlpha(float& OutPositionAlpha, float& OutXYCorrectionAlpha, float& OutZCorrectionAlpha);
 
-	// Update Parkour Character Step 3.
-	void GetLerpedCurrentPlayerTransform(const FTransform& ParkourStartOffset, const FTransform& ParkourAnimationOffset, const FTransform& ParkourActualOffset, FTransform& OutLerpedTarget);
+	// Update Parkour Character Step 3. Lerp player's character transform which active parkour interaction
+	void GetLerpedCurrentPlayerTransform(const float& InPositionAlpha, const float& InXYCorrectionAlpha, const float& InZCorrectionAlpha, const float& InProgressAlpha, FTransform& OutLerpedTarget);
+
+	// Update Custom
+	void GetLerpedCustomTransform(const float& InProgressAlpha, FTransform& OutLerpedTarget);
+
+	// FTransform GetParkourStartPoint
 
 	// ==========================================
 public:
@@ -256,7 +262,7 @@ public:
 	FOnInputCharacterMovingData OnInputCharacterMovingData;
 
 	// Debug draw time
-	static constexpr float PARKOUR_DEBUG_DRAW_TIME = 100.0f;
+	static constexpr float PARKOUR_DEBUG_DRAW_TIME = 1.0f;
 
 private:
 
@@ -291,4 +297,11 @@ private:
 	// Parkour timeline's delegate object
 	FOnTimelineFloat ParkourTimelineUpdateDelegate;
 	FOnTimelineEvent ParkourTimelineFinishDelegate;
+
+	// Parkour params
+	FParkourParams ParkourParams;
+
+	FTransform ParkourTarget;
+	FTransform ParkourAnimationStartOffset;
+	FTransform ParkourActualStartOffset;
 };
