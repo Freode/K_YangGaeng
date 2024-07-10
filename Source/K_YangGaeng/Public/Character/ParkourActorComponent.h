@@ -241,6 +241,15 @@ private:
 
 	// ========================================== 
 
+	// ======== Parkour Timeline Update =========
+
+	// Update Parkour Character Step 2. Get each curve's alpha data with parkour timeline progress position
+	void GetParkourTimelineCurvesAlpha(const FParkourParams& InParkourParams, float& OutPositionAlpha, float& OutXYCorrectionAlpha, float& OutZCorrectionAlpha);
+
+	// Update Parkour Character Step 3.
+	void GetLerpedCurrentPlayerTransform(const FTransform& ParkourStartOffset, const FTransform& ParkourAnimationOffset, const FTransform& ParkourActualOffset, FTransform& OutLerpedTarget);
+
+	// ==========================================
 public:
 
 	// Get Player's mouse moving data delegate
