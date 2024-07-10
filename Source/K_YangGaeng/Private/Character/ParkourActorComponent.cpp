@@ -20,7 +20,7 @@ UParkourActorComponent::UParkourActorComponent()
     }
 
     // Low parkour animation asset
-    static ConstructorHelpers::FObjectFinder<UAnimMontage> LOWPARKOURANIMATION(TEXT("/Game/K_YangGaeng/Characters/Animations/Sequences/ALS_N_Mantle_2m_Montage_Default.ALS_N_Mantle_2m_Montage_Default"));
+    static ConstructorHelpers::FObjectFinder<UAnimMontage> LOWPARKOURANIMATION(TEXT("/Game/K_YangGaeng/Characters/Animations/Sequences/ALS_N_Mantle_1m_Montage_Default.ALS_N_Mantle_1m_Montage_Default"));
     if (LOWPARKOURANIMATION.Succeeded())
     {
         LowParkourAnimation = LOWPARKOURANIMATION.Object;
@@ -159,7 +159,7 @@ FVector UParkourActorComponent::GetCapsuleLocationFromBase(FVector BaseLocation,
 * @param OutParkourWallComponent - Wall which is climbed possible
 * @param OutParkourType - Play different parkour animation from climbed height
 */
-bool UParkourActorComponent::CheckParkourPossible(float& ParkourHeight, FTransform& ParkourWallTransform, UPrimitiveComponent*& ParkourWallComponent, EParkourType& ParkourType)
+bool UParkourActorComponent::CheckParkourPossible(float& OutParkourHeight, FTransform& OutParkourTarget, UPrimitiveComponent*& OutParkourWallComponent, EParkourType& OutParkourType)
 {
     // Temp setting
     FParkourTraceSetting TraceSetting = FParkourTraceSetting::FParkourTraceSetting(250.0f, 50.0f, 75.0f, 30.0f, 30.0f);
@@ -174,8 +174,8 @@ bool UParkourActorComponent::CheckParkourPossible(float& ParkourHeight, FTransfo
 
     // Checking 2
     FVector DownTraceLocation;
-    UPrimitiveComponent* HitComponent;
-    bIsContinueNextStage = CheckPlayerIsClimbedWallHeight(TraceSetting, DebugType, InitialTraceImpactPoint, InitialTraceNormal, DownTraceLocation, HitComponent);
+    UPrimitiveComponent* WallComponent;
+    bIsContinueNextStage = CheckPlayerIsClimbedWallHeight(TraceSetting, DebugType, InitialTraceImpactPoint, InitialTraceNormal, DownTraceLocation, WallComponent);
     K_YG_SIMPLE_CHECK(bIsContinueNextStage, false);
 
     // Checking 3
@@ -184,27 +184,42 @@ bool UParkourActorComponent::CheckParkourPossible(float& ParkourHeight, FTransfo
     bIsContinueNextStage = CheckNotingOverTheWall(DebugType, InitialTraceNormal, DownTraceLocation, TargetTransform, ClimbedHeight);
     K_YG_SIMPLE_CHECK(bIsContinueNextStage, false);
 
+    // Determine parkour type
+    K_YG_UELOG(Warning, TEXT("Climbed Height : %f"), ClimbedHeight);
+    
+    OutParkourHeight = ClimbedHeight;
+    OutParkourType = ClimbedHeight > 125.0f ? EParkourType::HIGH_PARKOUR : EParkourType::LOW_PARKOUR;
+    OutParkourWallComponent = WallComponent;
+    OutParkourTarget = TargetTransform;
+
     return true;
 }
 
 // 
-bool UParkourActorComponent::StartParkour(const float InParkourHeight, const FTransform InParkourWallTransform, const UPrimitiveComponent*& InParkourWallComponent, const EParkourType& InParkourType)
+bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FTransform& InParkourTarget, UPrimitiveComponent*& InParkourWallComponent, const EParkourType& InParkourType)
 {
     // Step 1.
-    FParkourParams ParkourParams = CreateParkourParams(InParkourType, InParkourHeight);
+    ParkourParams = CreateParkourParams(InParkourType, InParkourHeight);
     // Step 2.
-    FTransform ParkourWallLocalTransform = InParkourWallTransform;
-    ParkourWallLocalTransform = ChangeParkourWallTransformWorldToLocal(InParkourWallComponent, ParkourWallLocalTransform);
+    ParkourTarget = InParkourTarget;
+    FTransform ParkourTargetLocalTransform = ChangeParkourWallTransformWorldToLocal(InParkourWallComponent, ParkourTarget);
     // Step 3.
-    FTransform ParkourActualStartOffset = GetActualStartParkourOffset(ParkourWallLocalTransform);
+    ParkourActualStartOffset = GetActualStartParkourOffset();
     // Step 4.
-    FTransform ParkourAnimationStartOffset = CalculateParkourAnimationStartOffset(ParkourParams, InParkourWallTransform);
+    ParkourAnimationStartOffset = CalculateParkourAnimationStartOffset();
+    K_YG_UELOG(Warning, TEXT("Parkour Height : %f"), InParkourHeight);
+    K_YG_UELOG(Warning, TEXT("Target Transform : %s"), *ParkourTarget.ToString());
+    K_YG_UELOG(Warning, TEXT("Parkour Wall Component : %s"), *InParkourWallComponent->GetName());
+    K_YG_UELOG(Warning, TEXT("Parkour Actual Start Offset : %s"), *ParkourActualStartOffset.ToString());
+    K_YG_UELOG(Warning, TEXT("Parkour Animation Start Offset : %s"), *ParkourAnimationStartOffset.ToString());
     // Step 5.
     CheckPlayerCharacter();
     Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
     // Step 6.
-    PlayParkourTimeline(ParkourParams);
+    PlayParkourTimeline();
     // Step 7.
+    bool bIsPlayParkour = PlayParkourAnimation();
+    K_YG_UELOG(Warning, TEXT("Play Parkour : %d"), bIsPlayParkour);
 
     return false;
 }
@@ -259,6 +274,7 @@ bool UParkourActorComponent::CheckWallIsFrontOfCharacter(const FParkourTraceSett
     {
         OutInitialTraceImpactPoint = HitResult.ImpactPoint;
         OutInitialTraceNormal = HitResult.ImpactNormal;
+        
         return true;
     }
     // Impossible to climb wall
@@ -371,7 +387,7 @@ bool UParkourActorComponent::CheckNotingOverTheWall(const EDrawDebugTrace::Type 
     // Don't overlap or hit anything
     if ((HitResult.bBlockingHit || HitResult.bStartPenetrating) == false)
     {
-        FRotator TargetRotation = UKismetMathLibrary::Conv_VectorToRotator(InInitialTraceNormal * FVector(-1.0f, -1.0f, -1.0f));
+        FRotator TargetRotation = UKismetMathLibrary::Conv_VectorToRotator(InInitialTraceNormal * FVector(-1.0f, -1.0f, 0.0f));
         OutTargetTransform = UKismetMathLibrary::MakeTransform(TargetLocation, TargetRotation, FVector(1.0f, 1.0f, 1.0f));
         OutClimbedHeight = (TargetLocation - GetOwner()->GetActorLocation()).Z;
 
@@ -442,61 +458,64 @@ FParkourAssetSetting UParkourActorComponent::GetParkourAssetSetting(const EParko
 }
 
 // Parkour wall change transform from world to local
-FTransform UParkourActorComponent::ChangeParkourWallTransformWorldToLocal(const UPrimitiveComponent* InComponent, FTransform& InTransform)
+FTransform UParkourActorComponent::ChangeParkourWallTransformWorldToLocal(class UPrimitiveComponent* &InComponent, FTransform& InTransform)
 {
     return UMathExpansionFunctionLibrary::ChangeComponentTransformWorldToLocal(InComponent, InTransform);
 }
 
 // Return actual start parkour offset
-FTransform UParkourActorComponent::GetActualStartParkourOffset(const FTransform& InTargetTransform)
+FTransform UParkourActorComponent::GetActualStartParkourOffset()
 {
-    return UMathExpansionFunctionLibrary::TransformMinusOperation(GetOwner()->GetActorTransform(), InTargetTransform);
+    return UMathExpansionFunctionLibrary::TransformMinusOperation(GetOwner()->GetActorTransform(), ParkourTarget);
 }
 
 // Return calculate parkour animation start offset
-FTransform UParkourActorComponent::CalculateParkourAnimationStartOffset(const FParkourParams& InParkourParams, const FTransform& InTargetTransform)
+FTransform UParkourActorComponent::CalculateParkourAnimationStartOffset()
 {
     // The location which player character is climbed target is modified offset distance to wall inner direction 
-    FVector TargetDirection = UKismetMathLibrary::Conv_RotatorToVector(InTargetTransform.GetRotation().Rotator());
+    FVector TargetDirection = UKismetMathLibrary::Conv_RotatorToVector(ParkourTarget.GetRotation().Rotator());
+
+    // Get Distance with target direction
+    FVector TargetLocationWithDirection = TargetDirection * ParkourParams.StartingOffset.Y;
 
     // Climbed target location - XY : 65, Z : 200
-    FVector ModifiedLocation = InTargetTransform.GetLocation() - FVector(TargetDirection.X, TargetDirection.Y, InParkourParams.StartingOffset.Z);
+    FVector ModifiedLocation = ParkourTarget.GetLocation() - FVector(TargetLocationWithDirection.X, TargetLocationWithDirection.Y, ParkourParams.StartingOffset.Z);
 
     // Calculate start parkour animation offset and return it
-    FTransform TempModifiedTransform = UKismetMathLibrary::MakeTransform(ModifiedLocation, InTargetTransform.GetRotation().Rotator(), FVector(1.0f, 1.0f, 1.0f));
-    return UMathExpansionFunctionLibrary::TransformMinusOperation(TempModifiedTransform, InTargetTransform);
+    FTransform TempModifiedTransform = UKismetMathLibrary::MakeTransform(ModifiedLocation, ParkourTarget.GetRotation().Rotator(), FVector(1.0f, 1.0f, 1.0f));
+    return UMathExpansionFunctionLibrary::TransformMinusOperation(TempModifiedTransform, ParkourTarget);
 }
 
 // Start Parkour Step 6. Play parkour timeline
-void UParkourActorComponent::PlayParkourTimeline(const FParkourParams& InParkourParams)
+void UParkourActorComponent::PlayParkourTimeline()
 {
     // Get timeline max length
     float TimelineMinLength, TimelineMaxLength;
-    InParkourParams.PositionAndCorrectionCurve->GetTimeRange(TimelineMinLength, TimelineMaxLength);
+    ParkourParams.PositionAndCorrectionCurve->GetTimeRange(TimelineMinLength, TimelineMaxLength);
 
     // Modify start position with parkour param's start position offset
-    TimelineMaxLength = TimelineMaxLength - InParkourParams.StartingPosition;
+    float NewTimelineLength = TimelineMaxLength - ParkourParams.StartingPosition;
 
     // Set parkour timeline details
-    ParkourTimeline->SetTimelineLength(TimelineMaxLength);
-    ParkourTimeline->SetPlayRate(InParkourParams.PlayRate);
+    ParkourTimeline->SetTimelineLength(NewTimelineLength);
+    ParkourTimeline->SetPlayRate(ParkourParams.PlayRate);
 
     // Play parkour timeline
     ParkourTimeline->PlayFromStart();
 }
 
 // Start Parkour Step 7. Play parkour animation
-bool UParkourActorComponent::PlayParkourAnimation(const FParkourParams& InParkourParams)
+bool UParkourActorComponent::PlayParkourAnimation()
 {
     // Checking anim montage is valid
-    K_YG_SIMPLE_CHECK(InParkourParams.AnimMontage != nullptr, false);
+    K_YG_SIMPLE_CHECK(ParkourParams.AnimMontage != nullptr, false);
 
     // Checking player character's anim instance is valid
     UAnimInstance* CharacterAnimInstance = Character->GetMesh()->GetAnimInstance();
     K_YG_SIMPLE_CHECK(CharacterAnimInstance != nullptr, false);
 
     // Play parkour anim montage
-    CharacterAnimInstance->Montage_Play(InParkourParams.AnimMontage, InParkourParams.PlayRate, EMontagePlayReturnType::MontageLength, InParkourParams.StartingPosition, false);
+    CharacterAnimInstance->Montage_Play(ParkourParams.AnimMontage, ParkourParams.PlayRate, EMontagePlayReturnType::MontageLength, ParkourParams.StartingPosition, false);
 
     return true;
 }
@@ -504,29 +523,71 @@ bool UParkourActorComponent::PlayParkourAnimation(const FParkourParams& InParkou
 // Execute every one frame(tick) when parkour timeline is progressing(update)
 void UParkourActorComponent::ParkourTimelineUpdate(float Value)
 {
+    float PositionAlpha, XYCorrectionAlpha, ZCorrectionAlpha;
+    FTransform ResultTarget;
 
+    //
+    GetParkourTimelineCurvesAlpha(PositionAlpha, XYCorrectionAlpha, ZCorrectionAlpha);
+    //
+    GetLerpedCurrentPlayerTransform(PositionAlpha, XYCorrectionAlpha, ZCorrectionAlpha, Value, ResultTarget);
+    //
+    CheckPlayerCharacter();
+    Character->SetActorLocationAndRotation(ResultTarget.GetLocation(), ResultTarget.GetRotation().Rotator());
 }
 
 // Execute when parkour timeline progress finish
 void UParkourActorComponent::ParkourTimelineEnd()
 {
-
+    CheckPlayerCharacter();
+    Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
 // Update Parkour Character Step 2. Get each curve's alpha data with parkour timeline progress position
-void UParkourActorComponent::GetParkourTimelineCurvesAlpha(const FParkourParams& InParkourParams, float& OutPositionAlpha, float& OutXYCorrectionAlpha, float& OutZCorrectionAlpha)
+void UParkourActorComponent::GetParkourTimelineCurvesAlpha(float& OutPositionAlpha, float& OutXYCorrectionAlpha, float& OutZCorrectionAlpha)
 {
     //
-    float InTime = InParkourParams.StartingPosition + ParkourTimeline->GetPlaybackPosition();
+    float InTime = ParkourParams.StartingPosition + ParkourTimeline->GetPlaybackPosition();
 
     //
-    FVector AlphaValues = InParkourParams.PositionAndCorrectionCurve->GetVectorValue(InTime);
+    FVector AlphaValues = ParkourParams.PositionAndCorrectionCurve->GetVectorValue(InTime);
 
     OutPositionAlpha = AlphaValues.X;
     OutXYCorrectionAlpha = AlphaValues.Y;
     OutZCorrectionAlpha = AlphaValues.Z;
 }
 
-void UParkourActorComponent::GetLerpedCurrentPlayerTransform(const FTransform& ParkourStartOffset, const FTransform& ParkourAnimationOffset, const FTransform& ParkourActualOffset, FTransform& OutLerpedTarget)
+// Update Parkour Character Step 3. Lerp player's character transform which active parkour interaction
+void UParkourActorComponent::GetLerpedCurrentPlayerTransform(const float& InPositionAlpha, const float& InXYCorrectionAlpha, const float& InZCorrectionAlpha, const float& InProgressAlpha, FTransform& OutLerpedTarget)
 {
+    // ======= XY Transform Setting =======
+    FVector TargetXYLocation = FVector(ParkourAnimationStartOffset.GetLocation().X, ParkourAnimationStartOffset.GetLocation().Y, ParkourActualStartOffset.GetLocation().Z);
+    FTransform TargetXYTransform = UKismetMathLibrary::MakeTransform(TargetXYLocation, ParkourAnimationStartOffset.GetRotation().Rotator(), FVector(1.0f, 1.0f, 1.0f));
+
+    FTransform NewXYTransform = UKismetMathLibrary::TLerp(ParkourActualStartOffset, TargetXYTransform, InXYCorrectionAlpha);
+
+    // ======= Z Transform Setting =======
+    FVector TargetZLocation = FVector(ParkourActualStartOffset.GetLocation().X, ParkourActualStartOffset.GetLocation().Y, ParkourAnimationStartOffset.GetLocation().Z);
+    FTransform TargetZTransform = UKismetMathLibrary::MakeTransform(TargetZLocation, ParkourActualStartOffset.GetRotation().Rotator(), FVector(1.0f, 1.0f, 1.0f));
+
+    FTransform NewZTransform = UKismetMathLibrary::TLerp(ParkourActualStartOffset, TargetZTransform, InZCorrectionAlpha);
+
+    // ======= New Transform Setting =======
+    FVector NewTargetLocation = FVector(NewXYTransform.GetLocation().X, NewXYTransform.GetLocation().Y, NewZTransform.GetLocation().Z);
+    FTransform NewTargetTransform = UKismetMathLibrary::MakeTransform(NewTargetLocation, NewXYTransform.GetRotation().Rotator(), FVector(1.0f, 1.0f, 1.0f));
+
+    //
+    NewTargetTransform = UMathExpansionFunctionLibrary::TransformAddOperation(ParkourTarget, NewTargetTransform);
+    FTransform LerpCurveXData = UKismetMathLibrary::TLerp(NewTargetTransform, ParkourTarget, InPositionAlpha);
+
+    // 
+    FTransform StartingTargetTransform = UMathExpansionFunctionLibrary::TransformAddOperation(ParkourTarget, ParkourActualStartOffset);
+    FTransform FinalLerpedTargetTransform = UKismetMathLibrary::TLerp(StartingTargetTransform, LerpCurveXData, InProgressAlpha);
+
+    OutLerpedTarget = FinalLerpedTargetTransform;
+
+    // === Test ===
+    UKismetSystemLibrary::DrawDebugPoint(GetWorld(), OutLerpedTarget.GetLocation(), 10.0f, FLinearColor(1.0f, 0.5f, 0.0f), 100.0f);
+
+
+    K_YG_UELOG(Warning, TEXT("Final Lerped Location: %s"), *OutLerpedTarget.GetLocation().ToString());
 }
