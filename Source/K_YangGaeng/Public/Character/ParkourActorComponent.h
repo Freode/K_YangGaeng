@@ -171,7 +171,15 @@ public:
 	*/
 	bool CheckParkourPossible(float& OutParkourHeight, FTransform& OutParkourTarget, UPrimitiveComponent*& OutParkourWallComponent, EParkourType& OutParkourType);
 
-	//
+	/**
+	* Parkour animation play
+	*
+	*  @return Is parkour animation played normally?
+	*  @param InParkourHeight - Player character climbs height by going target position
+	*  @param InParkourTarget - Player character climbs to target position
+	*  @param InParkourWallComponent - Player character climbs the target component ( wall or ledge )
+	*  @param InParkourType - Player character plays parkour animation by climbed height
+	*/
 	bool StartParkour(const float& InParkourHeight, const FTransform& InParkourTarget, UPrimitiveComponent*& InParkourWallComponent, const EParkourType& InParkourType);
 
 private:
@@ -211,6 +219,15 @@ private:
 	* @param OutClimbedHeight - Player's character climbed that height
 	*/
 	bool CheckNotingOverTheWall(const EDrawDebugTrace::Type InDebugType, const FVector InInitialTraceNormal, const FVector InDownTraceLocation, FTransform& OutTargetTransform, float& OutClimbedHeight);
+
+	/**
+	* Use line trace by single channel to check height to deep. Prevent to operate low parkour type which under height is large to fall for player character
+	* 
+	* @return Falling height which is add to climbed height and decide more exactly parkour type
+	* @param InDebugType - Is it draw line trace's debug?
+	* @param InExamineLength - Examine line trace length
+	*/
+	float CheckUnderHeightWhenCharacterFalling(const EDrawDebugTrace::Type InDebugType, const float InExamineLength);
 
 	// Starting position and play rate change new range based on climbed height 
 	FParkourParams CreateParkourParams(const EParkourType& InParkourType, const float& InClimbedHeight);
@@ -252,11 +269,6 @@ private:
 
 	// Update Parkour Character Step 3. Lerp player's character transform which active parkour interaction
 	void GetLerpedCurrentPlayerTransform(const float& InPositionAlpha, const float& InXYCorrectionAlpha, const float& InZCorrectionAlpha, const float& InProgressAlpha, FTransform& OutLerpedTarget);
-
-	// Update Custom
-	//void GetLerpedCustomTransform(const float& InProgressAlpha, FTransform& OutLerpedTarget);
-
-	// FTransform GetParkourStartPoint
 
 	// ==========================================
 public:
@@ -304,10 +316,14 @@ private:
 	FOnTimelineFloat ParkourTimelineUpdateDelegate;
 	FOnTimelineEvent ParkourTimelineFinishDelegate;
 
-	// Parkour params
+	// Parkour params based on parkour mode
 	FParkourParams ParkourParams;
 
+	// Pakour position variables by playing parkour aniamtion
 	FTransform ParkourTarget;
 	FTransform ParkourAnimationStartOffset;
 	FTransform ParkourActualStartOffset;
+
+	// Is parkour playing?
+	bool bIsPlayingParkour = false;
 };
