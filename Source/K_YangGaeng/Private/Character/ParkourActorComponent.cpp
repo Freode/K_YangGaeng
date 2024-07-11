@@ -50,6 +50,8 @@ UParkourActorComponent::UParkourActorComponent()
     // Create parkour timeline component
     ParkourTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("ParkourTimeline"));
 
+    // Possible modify Timeline length by manual
+    ParkourTimeline->SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
 }
 
 
@@ -212,8 +214,7 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
     K_YG_UELOG(Warning, TEXT("Parkour Wall Component : %s"), *InParkourWallComponent->GetName());
     K_YG_UELOG(Warning, TEXT("Parkour Actual Start Offset : %s"), *ParkourActualStartOffset.ToString());
     K_YG_UELOG(Warning, TEXT("Parkour Animation Start Offset : %s"), *ParkourAnimationStartOffset.ToString());
-    // Step 5.
-    CheckPlayerCharacter();
+    // Step 5. Set character not movable
     Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
     // Step 6.
     PlayParkourTimeline();
@@ -494,7 +495,8 @@ void UParkourActorComponent::PlayParkourTimeline()
     ParkourParams.PositionAndCorrectionCurve->GetTimeRange(TimelineMinLength, TimelineMaxLength);
 
     // Modify start position with parkour param's start position offset
-    float NewTimelineLength = TimelineMaxLength - ParkourParams.StartingPosition;
+    float NewTimelineLength = TimelineMaxLength - ParkourParams.StartingPosition + 0.45f;
+    K_YG_UELOG(Warning, TEXT("timeline length : %f"), NewTimelineLength);
 
     // Set parkour timeline details
     ParkourTimeline->SetTimelineLength(NewTimelineLength);
@@ -539,7 +541,9 @@ void UParkourActorComponent::ParkourTimelineUpdate(float Value)
 void UParkourActorComponent::ParkourTimelineEnd()
 {
     CheckPlayerCharacter();
+    // Set character movable
     Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+    K_YG_UELOG(Warning, TEXT("parkour end timeline length : %f"), ParkourTimeline->GetTimelineLength());
 }
 
 // Update Parkour Character Step 2. Get each curve's alpha data with parkour timeline progress position
@@ -586,8 +590,6 @@ void UParkourActorComponent::GetLerpedCurrentPlayerTransform(const float& InPosi
     OutLerpedTarget = FinalLerpedTargetTransform;
 
     // === Test ===
-    UKismetSystemLibrary::DrawDebugPoint(GetWorld(), OutLerpedTarget.GetLocation(), 10.0f, FLinearColor(1.0f, 0.5f, 0.0f), 100.0f);
+    // UKismetSystemLibrary::DrawDebugPoint(GetWorld(), OutLerpedTarget.GetLocation(), 10.0f, FLinearColor(1.0f, 0.5f, 0.0f), 100.0f);
 
-
-    K_YG_UELOG(Warning, TEXT("Final Lerped Location: %s"), *OutLerpedTarget.GetLocation().ToString());
 }

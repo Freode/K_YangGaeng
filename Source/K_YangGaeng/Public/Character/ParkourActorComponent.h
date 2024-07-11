@@ -14,6 +14,9 @@ class UCurveFloat;
 // Get player character's moving data delegate
 DECLARE_DELEGATE_RetVal(const FVector2D, FOnInputCharacterMovingData);
 
+// Set character moveable delegate
+DECLARE_DELEGATE_OneParam(FOnSetCharacterMovableData, bool);
+
 // Parkour type is distributed by jump length
 UENUM(BlueprintType)
 enum class EParkourType : uint8
@@ -251,7 +254,7 @@ private:
 	void GetLerpedCurrentPlayerTransform(const float& InPositionAlpha, const float& InXYCorrectionAlpha, const float& InZCorrectionAlpha, const float& InProgressAlpha, FTransform& OutLerpedTarget);
 
 	// Update Custom
-	void GetLerpedCustomTransform(const float& InProgressAlpha, FTransform& OutLerpedTarget);
+	//void GetLerpedCustomTransform(const float& InProgressAlpha, FTransform& OutLerpedTarget);
 
 	// FTransform GetParkourStartPoint
 
@@ -260,6 +263,9 @@ public:
 
 	// Get Player's mouse moving data delegate
 	FOnInputCharacterMovingData OnInputCharacterMovingData;
+
+	// Get Player character's movable data delegate
+	FOnSetCharacterMovableData OnSetCharacterMovableData;
 
 	// Debug draw time
 	static constexpr float PARKOUR_DEBUG_DRAW_TIME = 1.0f;
