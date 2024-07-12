@@ -7,9 +7,14 @@
 #include "Components/TimelineComponent.h"
 #include "ParkourActorComponent.generated.h"
 
+// Forward declaration
 class UAnimMontage;
 class UCurveVector;
 class UCurveFloat;
+namespace EDrawDebugTrace
+{
+	enum Type;
+}
 
 // Get player character's moving data delegate
 DECLARE_DELEGATE_RetVal(const FVector2D, FOnInputCharacterMovingData);
@@ -189,45 +194,41 @@ private:
 	*
 	* @return Is specific wall in front of player character?
 	* @param InTraceSetting - Wall trace base setting values
-	* @param InDebugType - Is it draw capsule collision's debug?
 	* @param OutInitialTraceImpactPoint - Wall and capsule collision's interaction location
 	* @param OutInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 	*/
-	bool CheckWallIsFrontOfCharacter(const FParkourTraceSetting& InTraceSetting, const EDrawDebugTrace::Type& InDebugType, FVector& OutInitialTraceImpactPoint, FVector& OutInitialTraceNormal);
+	bool CheckWallIsFrontOfCharacter(const FParkourTraceSetting& InTraceSetting, FVector& OutInitialTraceImpactPoint, FVector& OutInitialTraceNormal);
 
 	/**
 	* Use capsule collision to check the wall height whether player's character can climb or not
 	*
 	* @return Is the wall's height possible to climb ?
 	* @param InTraceSetting - Wall trace base setting values
-	* @param InDebugType - Is it draw capsule collision's debug?
 	* @param InInitialTraceImpactPoint - Wall and capsule collision's interaction location
 	* @param InInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 	* @param OutDownTraceLocation - Wall's height which is player's character climbed over the wall location
 	* @param OutHitComponent - Wall which is climbed possible
 	*/
-	bool CheckPlayerIsClimbedWallHeight(const FParkourTraceSetting InTraceSetting, const EDrawDebugTrace::Type InDebugType, const FVector InInitialTraceImpactPoint, const FVector InInitialTraceNormal, FVector& OutDownTraceLocation, UPrimitiveComponent*& OutHitComponent);
+	bool CheckPlayerIsClimbedWallHeight(const FParkourTraceSetting InTraceSetting, const FVector InInitialTraceImpactPoint, const FVector InInitialTraceNormal, FVector& OutDownTraceLocation, UPrimitiveComponent*& OutHitComponent);
 
 	/**
 	* Use capsule collision to check there is noting on the wall to prevent player character fixed state
 	*
 	* @return Is there noting on the wall?
-	* @param InDebugType - Is it draw capsule collision's debug?
 	* @param InInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 	* @param InDownTraceLocation - Wall's height which is player's character climbed on the wall location
 	* @param OutTargetTransform - Player's character climbed that total transform
 	* @param OutClimbedHeight - Player's character climbed that height
 	*/
-	bool CheckNotingOverTheWall(const EDrawDebugTrace::Type InDebugType, const FVector InInitialTraceNormal, const FVector InDownTraceLocation, FTransform& OutTargetTransform, float& OutClimbedHeight);
+	bool CheckNotingOverTheWall(const FVector InInitialTraceNormal, const FVector InDownTraceLocation, FTransform& OutTargetTransform, float& OutClimbedHeight);
 
 	/**
 	* Use line trace by single channel to check height to deep. Prevent to operate low parkour type which under height is large to fall for player character
 	* 
 	* @return Falling height which is add to climbed height and decide more exactly parkour type
-	* @param InDebugType - Is it draw line trace's debug?
 	* @param InExamineLength - Examine line trace length
 	*/
-	float CheckUnderHeightWhenCharacterFalling(const EDrawDebugTrace::Type InDebugType, const float InExamineLength);
+	float CheckUnderHeightWhenCharacterFalling(const float InExamineLength);
 
 	// Starting position and play rate change new range based on climbed height 
 	FParkourParams CreateParkourParams(const EParkourType& InParkourType, const float& InClimbedHeight);
@@ -279,13 +280,10 @@ public:
 	// Get Player character's movable data delegate
 	FOnSetCharacterMovableData OnSetCharacterMovableData;
 
-	// Debug draw time
-	static constexpr float PARKOUR_DEBUG_DRAW_TIME = 1.0f;
-
 private:
 
 	// Player character object which is attached this parkour component
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "K_YG|Locomotion|Parkour", meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = "K_YG|Locomotion|Parkour", meta = (AllowPrivateAccess = true))
 	class ACharacter* Character;
 
 	// When climb high height wall, high parkour animation is played
@@ -311,6 +309,14 @@ private:
 	// Parkour timeline component
 	UPROPERTY()
 	UTimelineComponent* ParkourTimeline;
+
+	// Constant - Debug draw time
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "K_YG|Locomotion|Parkour", meta = (AllowPrivateAccess = true))
+	float PARKOUR_DEBUG_DRAW_TIME;
+
+	// Constant - Debug Type
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "K_YG|Locomotion|Parkour", meta = (AllowPrivateAccess = true))
+	TEnumAsByte<EDrawDebugTrace::Type> PARKOUR_DEBUG_TYPE;
 
 	// Parkour timeline's delegate object
 	FOnTimelineFloat ParkourTimelineUpdateDelegate;

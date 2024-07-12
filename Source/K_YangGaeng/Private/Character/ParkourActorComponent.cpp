@@ -52,6 +52,10 @@ UParkourActorComponent::UParkourActorComponent()
 
     // Possible modify Timeline length by manual
     ParkourTimeline->SetTimelineLengthMode(ETimelineLengthMode::TL_TimelineLength);
+
+    // Constant initialization
+    PARKOUR_DEBUG_DRAW_TIME = 1.0f;
+    PARKOUR_DEBUG_TYPE = EDrawDebugTrace::Type::None;
 }
 
 
@@ -165,7 +169,6 @@ bool UParkourActorComponent::CheckParkourPossible(float& OutParkourHeight, FTran
 {
     // Temp setting
     FParkourTraceSetting TraceSetting = FParkourTraceSetting::FParkourTraceSetting(250.0f, 50.0f, 75.0f, 30.0f, 30.0f);
-    const EDrawDebugTrace::Type DebugType = EDrawDebugTrace::Type::ForDuration;
     FVector InitialTraceImpactPoint;
     FVector InitialTraceNormal;
     bool bIsContinueNextStage = false;
@@ -174,23 +177,23 @@ bool UParkourActorComponent::CheckParkourPossible(float& OutParkourHeight, FTran
     if (bIsPlayingParkour) { return false; }
 
     // Checking Step 2. Is valid the wall or ledge in front of player character?
-    bIsContinueNextStage = CheckWallIsFrontOfCharacter(TraceSetting, DebugType, InitialTraceImpactPoint, InitialTraceNormal);
+    bIsContinueNextStage = CheckWallIsFrontOfCharacter(TraceSetting, InitialTraceImpactPoint, InitialTraceNormal);
     K_YG_SIMPLE_CHECK(bIsContinueNextStage, false);
 
     // Checking Step 3. Is the wall or ledge climbable height?
     FVector DownTraceLocation;
     UPrimitiveComponent* WallComponent;
-    bIsContinueNextStage = CheckPlayerIsClimbedWallHeight(TraceSetting, DebugType, InitialTraceImpactPoint, InitialTraceNormal, DownTraceLocation, WallComponent);
+    bIsContinueNextStage = CheckPlayerIsClimbedWallHeight(TraceSetting, InitialTraceImpactPoint, InitialTraceNormal, DownTraceLocation, WallComponent);
     K_YG_SIMPLE_CHECK(bIsContinueNextStage, false);
 
     // Checking Step 4. Is noting collision object over the wall or ledge?
     FTransform TargetTransform;
     float ClimbedHeight;
-    bIsContinueNextStage = CheckNotingOverTheWall(DebugType, InitialTraceNormal, DownTraceLocation, TargetTransform, ClimbedHeight);
+    bIsContinueNextStage = CheckNotingOverTheWall(InitialTraceNormal, DownTraceLocation, TargetTransform, ClimbedHeight);
     K_YG_SIMPLE_CHECK(bIsContinueNextStage, false);
 
     // Checking Step 5. Check falling height to large
-    float FallingHeight = CheckUnderHeightWhenCharacterFalling(DebugType, 125.0f);
+    float FallingHeight = CheckUnderHeightWhenCharacterFalling(125.0f);
 
     // Determine parkour type  
     OutParkourHeight = ClimbedHeight;
@@ -214,7 +217,7 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
 {
     // Step 0. Set parkour animation is playing state
     bIsPlayingParkour = true;
-
+    
     // Step 1. Create parkour params by parkour type
     ParkourParams = CreateParkourParams(InParkourType, InParkourHeight);
     // Step 2. Set climbed position
@@ -246,11 +249,10 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
 *
 * @return Is specific wall in front of player character?
 * @param InTraceSetting - Wall trace base setting values
-* @param InDebugType - Is it draw capsule collision's debug?
 * @param OutInitialTraceImpactPoint - Wall and capsule collision's interaction location
 * @param OutInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 */
-bool UParkourActorComponent::CheckWallIsFrontOfCharacter(const FParkourTraceSetting& InTraceSetting, const EDrawDebugTrace::Type& InDebugType, FVector& OutInitialTraceImpactPoint, FVector& OutInitialTraceNormal)
+bool UParkourActorComponent::CheckWallIsFrontOfCharacter(const FParkourTraceSetting& InTraceSetting, FVector& OutInitialTraceImpactPoint, FVector& OutInitialTraceNormal)
 {
     // Get trace start location which is started character's backward
     // Z is modified to average of checking ledge height
@@ -279,7 +281,7 @@ bool UParkourActorComponent::CheckWallIsFrontOfCharacter(const FParkourTraceSett
     FLinearColor TraceHitColor = FLinearColor::Yellow;
 
     // Activate capsule trace channel
-    bool bIsHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), StartLocation, EndLocation, Radius, HalfHeight, TraceChannel, bTraceComplex, IgnoreList, InDebugType, HitResult, bIgnoreSelf, TraceColor, TraceHitColor, PARKOUR_DEBUG_DRAW_TIME);
+    bool bIsHit = UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), StartLocation, EndLocation, Radius, HalfHeight, TraceChannel, bTraceComplex, IgnoreList, PARKOUR_DEBUG_TYPE, HitResult, bIgnoreSelf, TraceColor, TraceHitColor, PARKOUR_DEBUG_DRAW_TIME);
 
     // Checking
     bool bIsWalkable = Character->GetCharacterMovement()->IsWalkable(HitResult);
@@ -309,13 +311,12 @@ bool UParkourActorComponent::CheckWallIsFrontOfCharacter(const FParkourTraceSett
 *
 * @return Is the wall's height possible to climb ?
 * @param InTraceSetting - Wall trace base setting values
-* @param InDebugType - Is it draw capsule collision's debug?
 * @param InInitialTraceImpactPoint - Wall and capsule collision's interaction location
 * @param InInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 * @param OutDownTraceLocation - Wall's height which is player's character climbed over the wall location
 * @param OutHitComponent - Wall which is climbed possible
 */
-bool UParkourActorComponent::CheckPlayerIsClimbedWallHeight(const FParkourTraceSetting InTraceSetting, const EDrawDebugTrace::Type InDebugType, const FVector InInitialTraceImpactPoint, const FVector InInitialTraceNormal, FVector& OutDownTraceLocation, UPrimitiveComponent*& OutHitComponent)
+bool UParkourActorComponent::CheckPlayerIsClimbedWallHeight(const FParkourTraceSetting InTraceSetting, const FVector InInitialTraceImpactPoint, const FVector InInitialTraceNormal, FVector& OutDownTraceLocation, UPrimitiveComponent*& OutHitComponent)
 {
     // Set interact bottom(end) wall location
     // XY - wall's interaction location XY, Z - character's height
@@ -342,7 +343,7 @@ bool UParkourActorComponent::CheckPlayerIsClimbedWallHeight(const FParkourTraceS
     FLinearColor TraceHitColor = FLinearColor::Green;
 
     // Activate sphere trace channel
-    bool bIsHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartWallLocation, EndWallLocation, Radius, TraceChannel, bTraceComplex, IgnoreActors, InDebugType, HitResult, bIgnoreSelf, TraceColor, TraceHitColor, PARKOUR_DEBUG_DRAW_TIME);
+    bool bIsHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), StartWallLocation, EndWallLocation, Radius, TraceChannel, bTraceComplex, IgnoreActors, PARKOUR_DEBUG_TYPE, HitResult, bIgnoreSelf, TraceColor, TraceHitColor, PARKOUR_DEBUG_DRAW_TIME);
 
     // Player character can climb over the interact wall
     if (HitResult.bBlockingHit && Character->GetCharacterMovement()->IsWalkable(HitResult))
@@ -362,13 +363,12 @@ bool UParkourActorComponent::CheckPlayerIsClimbedWallHeight(const FParkourTraceS
 * Use capsule collision to check there is noting on the wall to prevent player character fixed state
 *
 * @return Is there noting on the wall?
-* @param InDebugType - Is it draw capsule collision's debug?
 * @param InInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 * @param InDownTraceLocation - Wall's height which is player's character climbed on the wall location
 * @param OutTargetTransform - Player's character climbed that total transform
 * @param OutClimbedHeight - Player's character climbed that height
 */
-bool UParkourActorComponent::CheckNotingOverTheWall(const EDrawDebugTrace::Type InDebugType, const FVector InInitialTraceNormal, const FVector InDownTraceLocation, FTransform& OutTargetTransform, float& OutClimbedHeight)
+bool UParkourActorComponent::CheckNotingOverTheWall(const FVector InInitialTraceNormal, const FVector InDownTraceLocation, FTransform& OutTargetTransform, float& OutClimbedHeight)
 {
     UCapsuleComponent* CharacterCapsule = Character->GetCapsuleComponent();
     K_YG_CHECK(CharacterCapsule != nullptr, false);
@@ -399,7 +399,7 @@ bool UParkourActorComponent::CheckNotingOverTheWall(const EDrawDebugTrace::Type 
     FLinearColor TraceHitColor = FLinearColor(FVector(0.0f, 0.5f, 1.0f));
 
     // Simulate start
-    bool bIsHit = UKismetSystemLibrary::SphereTraceSingleByProfile(GetWorld(), StartLocation, EndLocation, Radius, ProfileName, bTraceComplex, IgnoreActors, InDebugType, HitResult, bIgnoreSelf, TraceColor, TraceHitColor, PARKOUR_DEBUG_DRAW_TIME);
+    bool bIsHit = UKismetSystemLibrary::SphereTraceSingleByProfile(GetWorld(), StartLocation, EndLocation, Radius, ProfileName, bTraceComplex, IgnoreActors, PARKOUR_DEBUG_TYPE, HitResult, bIgnoreSelf, TraceColor, TraceHitColor, PARKOUR_DEBUG_DRAW_TIME);
 
     // Don't overlap or hit anything
     if ((HitResult.bBlockingHit || HitResult.bStartPenetrating) == false)
@@ -423,7 +423,7 @@ bool UParkourActorComponent::CheckNotingOverTheWall(const EDrawDebugTrace::Type 
 * @param InDebugType - Is it draw line trace's debug?
 * @param InExamineLength - Examine line trace length
 */
-float UParkourActorComponent::CheckUnderHeightWhenCharacterFalling(const EDrawDebugTrace::Type InDebugType, const float InExamineLength)
+float UParkourActorComponent::CheckUnderHeightWhenCharacterFalling(const float InExamineLength)
 {
     // Setting examine range
     float CharacterHalfHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
@@ -444,7 +444,7 @@ float UParkourActorComponent::CheckUnderHeightWhenCharacterFalling(const EDrawDe
     FLinearColor TraceColor = FLinearColor::Red;
     FLinearColor TraceHitColor = FLinearColor::Green;
 
-    bool bIsHit = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation, EndLocation, CustomTraceChannel, bTraceComplex, IgnoreActors, InDebugType, HitResult, bIgnoreSelf, TraceColor, TraceHitColor, PARKOUR_DEBUG_DRAW_TIME);
+    bool bIsHit = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation, EndLocation, CustomTraceChannel, bTraceComplex, IgnoreActors, PARKOUR_DEBUG_TYPE, HitResult, bIgnoreSelf, TraceColor, TraceHitColor, PARKOUR_DEBUG_DRAW_TIME);
 
     // Return depth height - InExamineLength is Maximum
     return bIsHit ? StartLocation.Z - HitResult.ImpactPoint.Z : InExamineLength;
@@ -547,7 +547,6 @@ void UParkourActorComponent::PlayParkourTimeline()
 
     // Modify start position with parkour param's start position offset
     float NewTimelineLength = TimelineMaxLength - ParkourParams.StartingPosition + 0.45f;
-    K_YG_UELOG(Warning, TEXT("timeline length : %f"), NewTimelineLength);
 
     // Set parkour timeline details
     ParkourTimeline->SetTimelineLength(NewTimelineLength);
@@ -596,7 +595,23 @@ void UParkourActorComponent::ParkourTimelineEnd()
 {
     CheckPlayerCharacter();
 
-    //K_YG_UELOG(Warning, TEXT("Mesh Rotation 1 : %s"), *Character->GetMesh()->GetComponentRotation().ToString());
+    // Set player character's rotation manually. Because it prevents to incorrect character rotation when parkour timeline finished.
+    float TargetMeshRotationYaw = Character->GetMesh()->GetComponentRotation().Yaw;
+    if (TargetMeshRotationYaw < 0.0f)
+    {
+        // minus value modify to plus value
+        TargetMeshRotationYaw = TargetMeshRotationYaw + 360.0f;
+    }
+    // When player character is spawned, it's control rotation yaw value is -90.0f. So it needs to revise value.
+    TargetMeshRotationYaw = TargetMeshRotationYaw + 90.0f;
+
+    // Set player character's control rotation
+    AController* Controller = Cast<AController>(Character->GetController());
+    if (Controller == nullptr) { return; }
+    FRotator ControlRotation = Character->GetControlRotation();
+    ControlRotation.Yaw = TargetMeshRotationYaw;
+    Controller->SetControlRotation(ControlRotation);
+
     // Set character movable
     Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 
