@@ -13,14 +13,14 @@ UParkourActorComponent::UParkourActorComponent()
     PrimaryComponentTick.bCanEverTick = false;
 
     // High parkour animation asset
-    static ConstructorHelpers::FObjectFinder<UAnimMontage> HIGHPARKOURANIMATION(TEXT("/Game/K_YangGaeng/Characters/Animations/Sequences/ALS_N_Mantle_2m_Montage_Default.ALS_N_Mantle_2m_Montage_Default"));
+    static ConstructorHelpers::FObjectFinder<UAnimMontage> HIGHPARKOURANIMATION(TEXT("/Game/K_YangGaeng/Characters/Animations/Sequences/AM_N_Mantle_2m_Montage_Default.AM_N_Mantle_2m_Montage_Default"));
     if (HIGHPARKOURANIMATION.Succeeded())
     {
         HighParkourAnimation = HIGHPARKOURANIMATION.Object;
     }
 
     // Low parkour animation asset
-    static ConstructorHelpers::FObjectFinder<UAnimMontage> LOWPARKOURANIMATION(TEXT("/Game/K_YangGaeng/Characters/Animations/Sequences/ALS_N_Mantle_1m_Montage_Default.ALS_N_Mantle_1m_Montage_Default"));
+    static ConstructorHelpers::FObjectFinder<UAnimMontage> LOWPARKOURANIMATION(TEXT("/Game/K_YangGaeng/Characters/Animations/Sequences/AM_N_Mantle_1m_Montage_Default.AM_N_Mantle_1m_Montage_Default"));
     if (LOWPARKOURANIMATION.Succeeded())
     {
         LowParkourAnimation = LOWPARKOURANIMATION.Object;
