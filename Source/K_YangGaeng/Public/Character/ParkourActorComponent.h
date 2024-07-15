@@ -37,8 +37,8 @@ struct FParkourAssetSetting
 	GENERATED_BODY()
 
 	// Play parkour animation asset
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Asset")
-		class UAnimMontage* AnimMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Asset")
+	class UAnimMontage* AnimMontage;
 
 	// Character's transform is modified with this curve data when character plays parkour animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Asset")
@@ -80,8 +80,8 @@ struct FParkourTraceSetting
 	GENERATED_BODY()
 
 	// Check parkour interaction possibility within max height
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Trace")
-		float MaxLedgeHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Trace")
+	float MaxLedgeHeight;
 
 	// Check parkour interaction possibility within min height
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Trace")
@@ -110,8 +110,8 @@ struct FParkourParams
 	GENERATED_BODY()
 
 	// Play parkour animation asset
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Params")
-		class UAnimMontage* AnimMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Params")
+	class UAnimMontage* AnimMontage;
 
 	// Character's transform is modified with this curve data when character plays parkour animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Params")
@@ -164,6 +164,9 @@ public:
 
 	// Get capsule location from base
 	FVector GetCapsuleLocationFromBase(FVector BaseLocation, float ZOffset);
+
+	// Get is playing parkour?
+	bool GetIsPlayingParkour() const { return bIsPlayingParkour; }
 
 	/**
 	* Parkour possiblility checked
