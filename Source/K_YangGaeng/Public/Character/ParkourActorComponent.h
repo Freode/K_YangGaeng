@@ -7,12 +7,20 @@
 #include "Components/TimelineComponent.h"
 #include "ParkourActorComponent.generated.h"
 
+// Forward declaration
 class UAnimMontage;
 class UCurveVector;
 class UCurveFloat;
+namespace EDrawDebugTrace
+{
+	enum Type;
+}
 
 // Get player character's moving data delegate
 DECLARE_DELEGATE_RetVal(const FVector2D, FOnInputCharacterMovingData);
+
+// Set character moveable delegate
+DECLARE_DELEGATE_OneParam(FOnSetCharacterMovableData, bool);
 
 // Parkour type is distributed by jump length
 UENUM(BlueprintType)
@@ -29,8 +37,8 @@ struct FParkourAssetSetting
 	GENERATED_BODY()
 
 	// Play parkour animation asset
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Asset")
-		class UAnimMontage* AnimMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Asset")
+	class UAnimMontage* AnimMontage;
 
 	// Character's transform is modified with this curve data when character plays parkour animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Asset")
@@ -72,8 +80,8 @@ struct FParkourTraceSetting
 	GENERATED_BODY()
 
 	// Check parkour interaction possibility within max height
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Trace")
-		float MaxLedgeHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Trace")
+	float MaxLedgeHeight;
 
 	// Check parkour interaction possibility within min height
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Trace")
@@ -102,8 +110,8 @@ struct FParkourParams
 	GENERATED_BODY()
 
 	// Play parkour animation asset
-		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Params")
-		class UAnimMontage* AnimMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Params")
+	class UAnimMontage* AnimMontage;
 
 	// Character's transform is modified with this curve data when character plays parkour animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "K_YG|Locomotion|Parkour|Params")
@@ -157,6 +165,9 @@ public:
 	// Get capsule location from base
 	FVector GetCapsuleLocationFromBase(FVector BaseLocation, float ZOffset);
 
+	// Get is playing parkour?
+	bool GetIsPlayingParkour() const { return bIsPlayingParkour; }
+
 	/**
 	* Parkour possiblility checked
 	*
@@ -166,9 +177,32 @@ public:
 	* @param OutParkourWallComponent - Wall which is climbed possible
 	* @param OutParkourType - Play different parkour animation from climbed height
 	*/
-	bool CheckParkourPossible(float& OutParkourHeight, FTransform& OutParkourWallTransform, UPrimitiveComponent*& OutParkourWallComponent, EParkourType& OutParkourType);
+	bool CheckParkourPossible(float& OutParkourHeight, FTransform& OutParkourTarget, UPrimitiveComponent*& OutParkourWallComponent, EParkourType& OutParkourType);
 
-	bool StartParkour(const float InParkourHeight, const FTransform InParkourWallTransform, const UPrimitiveComponent*& InParkourWallComponent, const EParkourType& InParkourType);
+	/**
+	* Parkour animation play
+	*
+	*  @return Is parkour animation played normally?
+	*  @param InParkourHeight - Player character climbs height by going target position
+	*  @param InParkourTarget - Player character climbs to target position
+	*  @param InParkourWallComponent - Player character climbs the target component ( wall or ledge )
+	*  @param InParkourType - Player character plays parkour animation by climbed height
+	*/
+	bool StartParkour(const float& InParkourHeight, const FTransform& InParkourTarget, UPrimitiveComponent*& InParkourWallComponent, const EParkourType& InParkourType);
+
+	/**
+	*	Parkour animation stop
+	*
+	*	@return Is parkour animation stop successfully?
+	*/
+	bool StopParkour();
+
+	/**
+	*	Parkour animation reverse play
+	*
+	*	@return Is parkour animation stop successfully?
+	*/
+	bool ReverseParkour();
 
 private:
 
@@ -177,36 +211,41 @@ private:
 	*
 	* @return Is specific wall in front of player character?
 	* @param InTraceSetting - Wall trace base setting values
-	* @param InDebugType - Is it draw capsule collision's debug?
 	* @param OutInitialTraceImpactPoint - Wall and capsule collision's interaction location
 	* @param OutInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 	*/
-	bool CheckWallIsFrontOfCharacter(const FParkourTraceSetting& InTraceSetting, const EDrawDebugTrace::Type& InDebugType, FVector& OutInitialTraceImpactPoint, FVector& OutInitialTraceNormal);
+	bool CheckWallIsFrontOfCharacter(const FParkourTraceSetting& InTraceSetting, FVector& OutInitialTraceImpactPoint, FVector& OutInitialTraceNormal);
 
 	/**
 	* Use capsule collision to check the wall height whether player's character can climb or not
 	*
 	* @return Is the wall's height possible to climb ?
 	* @param InTraceSetting - Wall trace base setting values
-	* @param InDebugType - Is it draw capsule collision's debug?
 	* @param InInitialTraceImpactPoint - Wall and capsule collision's interaction location
 	* @param InInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 	* @param OutDownTraceLocation - Wall's height which is player's character climbed over the wall location
 	* @param OutHitComponent - Wall which is climbed possible
 	*/
-	bool CheckPlayerIsClimbedWallHeight(const FParkourTraceSetting InTraceSetting, const EDrawDebugTrace::Type InDebugType, const FVector InInitialTraceImpactPoint, const FVector InInitialTraceNormal, FVector& OutDownTraceLocation, UPrimitiveComponent*& OutHitComponent);
+	bool CheckPlayerIsClimbedWallHeight(const FParkourTraceSetting InTraceSetting, const FVector InInitialTraceImpactPoint, const FVector InInitialTraceNormal, FVector& OutDownTraceLocation, UPrimitiveComponent*& OutHitComponent);
 
 	/**
 	* Use capsule collision to check there is noting on the wall to prevent player character fixed state
 	*
 	* @return Is there noting on the wall?
-	* @param InDebugType - Is it draw capsule collision's debug?
 	* @param InInitialTraceNormal - Wall and capsule collision's interaction direction which is indirect collision to wall
 	* @param InDownTraceLocation - Wall's height which is player's character climbed on the wall location
 	* @param OutTargetTransform - Player's character climbed that total transform
 	* @param OutClimbedHeight - Player's character climbed that height
 	*/
-	bool CheckNotingOverTheWall(const EDrawDebugTrace::Type InDebugType, const FVector InInitialTraceNormal, const FVector InDownTraceLocation, FTransform& OutTargetTransform, float& OutClimbedHeight);
+	bool CheckNotingOverTheWall(const FVector InInitialTraceNormal, const FVector InDownTraceLocation, FTransform& OutTargetTransform, float& OutClimbedHeight);
+
+	/**
+	* Use line trace by single channel to check height to deep. Prevent to operate low parkour type which under height is large to fall for player character
+	* 
+	* @return Falling height which is add to climbed height and decide more exactly parkour type
+	* @param InExamineLength - Examine line trace length
+	*/
+	float CheckUnderHeightWhenCharacterFalling(const float InExamineLength);
 
 	// Starting position and play rate change new range based on climbed height 
 	FParkourParams CreateParkourParams(const EParkourType& InParkourType, const float& InClimbedHeight);
@@ -215,19 +254,19 @@ private:
 	FParkourAssetSetting GetParkourAssetSetting(const EParkourType& InParkourType);
 
 	// Parkour wall change transform from world to local
-	FTransform ChangeParkourWallTransformWorldToLocal(const class UPrimitiveComponent* InComponent, FTransform& InTransform);
+	FTransform ChangeParkourWallTransformWorldToLocal(class UPrimitiveComponent* &InComponent, FTransform& InTransform);
 
 	// Return actual start parkour offset
-	FTransform GetActualStartParkourOffset(const FTransform& InTargetTransform);
+	FTransform GetActualStartParkourOffset();
 
 	// Return calculate parkour animation start offset
-	FTransform CalculateParkourAnimationStartOffset(const FParkourParams& InParkourParams, const FTransform& InTargetTransform);
+	FTransform CalculateParkourAnimationStartOffset();
 
 	// Start Parkour Step 6. Play parkour timeline
-	void PlayParkourTimeline(const FParkourParams& InParkourParams);
+	void PlayParkourTimeline();
 
 	// Start Parkour Step 7. Play parkour animation
-	bool PlayParkourAnimation(const FParkourParams& InParkourParams);
+	bool PlayParkourAnimation();
 
 	// ========== Parkour Timeline ==============
 
@@ -241,18 +280,27 @@ private:
 
 	// ========================================== 
 
+	// ======== Parkour Timeline Update =========
+
+	// Update Parkour Character Step 2. Get each curve's alpha data with parkour timeline progress position
+	void GetParkourTimelineCurvesAlpha(float& OutPositionAlpha, float& OutXYCorrectionAlpha, float& OutZCorrectionAlpha);
+
+	// Update Parkour Character Step 3. Lerp player's character transform which active parkour interaction
+	void GetLerpedCurrentPlayerTransform(const float& InPositionAlpha, const float& InXYCorrectionAlpha, const float& InZCorrectionAlpha, const float& InProgressAlpha, FTransform& OutLerpedTarget);
+
+	// ==========================================
 public:
 
 	// Get Player's mouse moving data delegate
 	FOnInputCharacterMovingData OnInputCharacterMovingData;
 
-	// Debug draw time
-	static constexpr float PARKOUR_DEBUG_DRAW_TIME = 100.0f;
+	// Get Player character's movable data delegate
+	FOnSetCharacterMovableData OnSetCharacterMovableData;
 
 private:
 
 	// Player character object which is attached this parkour component
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "K_YG|Locomotion|Parkour", meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadOnly, Category = "K_YG|Locomotion|Parkour", meta = (AllowPrivateAccess = true))
 	class ACharacter* Character;
 
 	// When climb high height wall, high parkour animation is played
@@ -279,7 +327,29 @@ private:
 	UPROPERTY()
 	UTimelineComponent* ParkourTimeline;
 
+	// Constant - Debug draw time
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "K_YG|Locomotion|Parkour", meta = (AllowPrivateAccess = true))
+	float PARKOUR_DEBUG_DRAW_TIME;
+
+	// Constant - Debug Type
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "K_YG|Locomotion|Parkour", meta = (AllowPrivateAccess = true))
+	TEnumAsByte<EDrawDebugTrace::Type> PARKOUR_DEBUG_TYPE;
+
 	// Parkour timeline's delegate object
 	FOnTimelineFloat ParkourTimelineUpdateDelegate;
 	FOnTimelineEvent ParkourTimelineFinishDelegate;
+
+	// Parkour params based on parkour mode
+	FParkourParams ParkourParams;
+
+	// Pakour position variables by playing parkour aniamtion
+	FTransform ParkourTarget;
+	FTransform ParkourAnimationStartOffset;
+	FTransform ParkourActualStartOffset;
+
+	// Is parkour playing?
+	bool bIsPlayingParkour = false;
+
+	// Current playing parkour animation montage
+	class UAnimMontage* PlayingParkourAnimMontage;
 };
