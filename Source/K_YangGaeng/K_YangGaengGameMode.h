@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "K_YangGaeng.h"
 #include "GameFramework/GameModeBase.h"
 #include "K_YangGaengGameMode.generated.h"
 
