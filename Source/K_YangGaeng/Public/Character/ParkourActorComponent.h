@@ -190,6 +190,20 @@ public:
 	*/
 	bool StartParkour(const float& InParkourHeight, const FTransform& InParkourTarget, UPrimitiveComponent*& InParkourWallComponent, const EParkourType& InParkourType);
 
+	/**
+	*	Parkour animation stop
+	*
+	*	@return Is parkour animation stop successfully?
+	*/
+	bool StopParkour();
+
+	/**
+	*	Parkour animation reverse play
+	*
+	*	@return Is parkour animation stop successfully?
+	*/
+	bool ReverseParkour();
+
 private:
 
 	/**
@@ -335,4 +349,7 @@ private:
 
 	// Is parkour playing?
 	bool bIsPlayingParkour = false;
+
+	// Current playing parkour animation montage
+	class UAnimMontage* PlayingParkourAnimMontage;
 };

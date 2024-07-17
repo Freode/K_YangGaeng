@@ -245,6 +245,50 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
 }
 
 /**
+*	Parkour animation stop
+*
+*	@return Is parkour animation stop successfully?
+*/
+bool UParkourActorComponent::StopParkour()
+{
+    // When is not playing parkour, return 
+    K_YG_SIMPLE_CHECK(bIsPlayingParkour == true, false);
+
+    // Stop parkour animation
+    ParkourTimeline->Stop();
+
+    // Checking player character's anim instance is valid
+    UAnimInstance* CharacterAnimInstance = Character->GetMesh()->GetAnimInstance();
+    K_YG_SIMPLE_CHECK(CharacterAnimInstance != nullptr, false);
+    
+    // Play parkour anim montage
+    CharacterAnimInstance->Montage_Stop(0.0f, PlayingParkourAnimMontage);
+
+    ParkourTimelineEnd();
+    
+    return true;
+}
+
+/**
+*	Parkour animation reverse play
+*
+*	@return Is parkour animation stop successfully?
+*/
+bool UParkourActorComponent::ReverseParkour()
+{
+    // When is not playing parkour, return 
+    K_YG_SIMPLE_CHECK(bIsPlayingParkour == true, false);
+
+    // When parkour is playing forward checked
+    K_YG_SIMPLE_CHECK(ParkourTimeline->IsReversing() == false, false);
+
+    // Reverse play parkour animation
+    ParkourTimeline->Reverse();
+
+    return true;
+}
+
+/**
 * Use capsule collision to check wall is in front of character. If it is valid, return wall and capsule collision's interaction location & interaction direction
 *
 * @return Is specific wall in front of player character?
@@ -568,6 +612,7 @@ bool UParkourActorComponent::PlayParkourAnimation()
 
     // Play parkour anim montage
     CharacterAnimInstance->Montage_Play(ParkourParams.AnimMontage, ParkourParams.PlayRate, EMontagePlayReturnType::MontageLength, ParkourParams.StartingPosition, false);
+    PlayingParkourAnimMontage = ParkourParams.AnimMontage;
 
     return true;
 }
