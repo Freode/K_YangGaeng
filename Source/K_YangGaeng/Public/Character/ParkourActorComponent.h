@@ -168,6 +168,13 @@ public:
 	// Get is playing parkour?
 	bool GetIsPlayingParkour() const { return bIsPlayingParkour; }
 
+	// Get is possible to cancel parkour interaction?
+	bool GetIsPossibleToCancelParkour() const { return bIsPossibleCancelParkour; }
+
+	// Set parkour interaction cancel state
+	UFUNCTION()
+	void SetParkourCanCancelTime(const bool bCanCancel);
+
 	/**
 	* Parkour possiblility checked
 	*
@@ -289,6 +296,7 @@ private:
 	void GetLerpedCurrentPlayerTransform(const float& InPositionAlpha, const float& InXYCorrectionAlpha, const float& InZCorrectionAlpha, const float& InProgressAlpha, FTransform& OutLerpedTarget);
 
 	// ==========================================
+
 public:
 
 	// Get Player's mouse moving data delegate
@@ -350,6 +358,12 @@ private:
 	// Is parkour playing?
 	bool bIsPlayingParkour = false;
 
+	// Is parkour cancel time?
+	bool bIsPossibleCancelParkour = false;
+
 	// Current playing parkour animation montage
 	class UAnimMontage* PlayingParkourAnimMontage;
+
+	// Parkour start location
+	FVector ParkourStartLocation;
 };

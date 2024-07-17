@@ -218,6 +218,9 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
     // Step 0. Set parkour animation is playing state
     bIsPlayingParkour = true;
     
+    // Step 0. Get initial position
+    ParkourStartLocation = Character->GetActorLocation();
+
     // Step 1. Create parkour params by parkour type
     ParkourParams = CreateParkourParams(InParkourType, InParkourHeight);
     // Step 2. Set climbed position
@@ -256,11 +259,18 @@ bool UParkourActorComponent::StopParkour()
 
     // Stop parkour animation
     ParkourTimeline->Stop();
+    bIsPlayingParkour = false;
+    bIsPossibleCancelParkour = false;
+
+    // Reset player character location
+    float ResetZLocation = Character->GetMesh()->GetComponentLocation().Z;
+    FVector ResetCharacterLocation = FVector(ParkourStartLocation.X, ParkourStartLocation.Y, ResetZLocation);
+    Character->GetRootComponent()->SetWorldLocation(ResetCharacterLocation);
 
     // Checking player character's anim instance is valid
     UAnimInstance* CharacterAnimInstance = Character->GetMesh()->GetAnimInstance();
     K_YG_SIMPLE_CHECK(CharacterAnimInstance != nullptr, false);
-    
+
     // Play parkour anim montage
     CharacterAnimInstance->Montage_Stop(0.0f, PlayingParkourAnimMontage);
 
@@ -717,4 +727,10 @@ void UParkourActorComponent::GetLerpedCurrentPlayerTransform(const float& InPosi
     // === Test ===
     // UKismetSystemLibrary::DrawDebugPoint(GetWorld(), OutLerpedTarget.GetLocation(), 10.0f, FLinearColor(1.0f, 0.5f, 0.0f), 100.0f);
 
+}
+
+// Set parkour interaction cancel state
+void UParkourActorComponent::SetParkourCanCancelTime(const bool bCanCancel)
+{
+    bIsPossibleCancelParkour = bCanCancel;
 }
