@@ -651,21 +651,24 @@ void UParkourActorComponent::ParkourTimelineEnd()
     CheckPlayerCharacter();
 
     // Set player character's rotation manually. Because it prevents to incorrect character rotation when parkour timeline finished.
-    float TargetMeshRotationYaw = Character->GetMesh()->GetComponentRotation().Yaw;
+    // float TargetMeshRotationYaw = Character->GetMesh()->GetComponentRotation().Yaw;
+    float TargetMeshRotationYaw = Character->GetActorRotation().Yaw;
     if (TargetMeshRotationYaw < 0.0f)
     {
         // minus value modify to plus value
         TargetMeshRotationYaw = TargetMeshRotationYaw + 360.0f;
     }
     // When player character is spawned, it's control rotation yaw value is -90.0f. So it needs to revise value.
-    TargetMeshRotationYaw = TargetMeshRotationYaw + 90.0f;
+    // TargetMeshRotationYaw = TargetMeshRotationYaw + 90.0f;
 
     // Set player character's control rotation
     AController* Controller = Cast<AController>(Character->GetController());
     if (Controller == nullptr) { return; }
-    FRotator ControlRotation = Character->GetControlRotation();
+    FRotator ControlRotation = FRotator(0.0f, 0.0f, 0.0f);
     ControlRotation.Yaw = TargetMeshRotationYaw;
-    Controller->SetControlRotation(ControlRotation);
+    
+    // Controller->SetControlRotation(ControlRotation);
+    Character->SetActorRotation(ControlRotation);
 
     // Set character movable
     Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
