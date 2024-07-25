@@ -155,10 +155,14 @@ struct FParkourAnimData
 	UPROPERTY()
 	float PlayRate;
 
+	// 
+	UPROPERTY()
+	FRotator StartRotation;
+
 	// === Initializer === 
 	FParkourAnimData() : ParkourType(EParkourType::NONE), StartingPosition(0.0f), PlayRate(0.0f) {}
 
-	FParkourAnimData(EParkourType InParkourType, float InStartingPosition, float PlayRate) : ParkourType(InParkourType), StartingPosition(InStartingPosition), PlayRate(PlayRate) {}
+	FParkourAnimData(EParkourType InParkourType, float InStartingPosition, float PlayRate, FRotator InStartRotation) : ParkourType(InParkourType), StartingPosition(InStartingPosition), PlayRate(PlayRate) {}
 };
 
 // Use to send parkour data to server
@@ -275,30 +279,44 @@ public:
 	// =================================
 	// ======== RPC - To Server ========
 
-	//
+	// To Server - Send parkour's interaction data
 	UFUNCTION(Server, Reliable)
 	void ServerParkourTransformTimeline(const FParkourSendData& InParkourSendData);
+
+	// To Server - Stop parkour's interaction
+	UFUNCTION(Server, Reliable)
+	void ServerStopParkourInteraction();
 
 	// =================================
 	// ======== RPC - Multicast ========
 
-	//
+	// Multicast - Send parkour's interaction data to all device
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastParkourAnimationTimeline(const FParkourAnimData& InParkourAnimData);
+	void MulticastParkourTransformTimeline(const FParkourSendData& InParkourSendData);
+
+	// Multicast - Stop parkour's interaction
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStopParkourInteraction();
 
 protected:
 
 	// =================================
 	// ======== RPC - To Server ========
 
-	// 
+	// To Server - Send parkour's interaction data
 	void ServerParkourTransformTimeline_Implementation(const FParkourSendData& InParkourSendData);
+
+	// To Server - Stop parkour's interaction
+	void ServerStopParkourInteraction_Implementation();
 
 	// =================================
 	// ======== RPC - Multicast ========
 
-	//
-	void MulticastParkourAnimationTimeline_Implementation(const FParkourAnimData& InParkourAnimData);
+	// Multicast - Send parkour's interaction data to all device
+	void MulticastParkourTransformTimeline_Implementation(const FParkourSendData& InParkourSendData);
+
+	// Multicast - Stop parkour's interaction
+	void MulticastStopParkourInteraction_Implementation();
 
 private:
 
