@@ -26,6 +26,7 @@ DECLARE_DELEGATE_OneParam(FOnSetCharacterMovableData, bool);
 UENUM(BlueprintType)
 enum class EParkourType : uint8
 {
+	NONE,
 	HIGH_PARKOUR,
 	LOW_PARKOUR
 };
@@ -136,6 +137,62 @@ struct FParkourParams
 
 };
 
+// Use to send parkour animation data to all clients
+USTRUCT(BlueprintType)
+struct FParkourAnimData
+{
+	GENERATED_BODY()
+
+	// 
+	UPROPERTY()
+	EParkourType ParkourType;
+
+	//
+	UPROPERTY()
+	float StartingPosition;
+
+	//
+	UPROPERTY()
+	float PlayRate;
+
+	// === Initializer === 
+	FParkourAnimData() : ParkourType(EParkourType::NONE), StartingPosition(0.0f), PlayRate(0.0f) {}
+
+	FParkourAnimData(EParkourType InParkourType, float InStartingPosition, float PlayRate) : ParkourType(InParkourType), StartingPosition(InStartingPosition), PlayRate(PlayRate) {}
+};
+
+// Use to send parkour data to server
+USTRUCT(BlueprintType)
+struct FParkourSendData
+{
+	GENERATED_BODY()
+
+	// 
+	UPROPERTY()
+	FParkourAnimData ParkourAnimData;
+
+	//
+	UPROPERTY()
+	FVector StartingOffset;
+
+	//
+	UPROPERTY()
+	FTransform ParkourTarget;
+
+	//
+	UPROPERTY()
+	FTransform ParkourAnimationStartOffset;
+
+	//
+	UPROPERTY()
+	FTransform ParkourActualStartOffset;
+
+	// === Initializer === 
+	FParkourSendData() : ParkourAnimData(FParkourAnimData()), StartingOffset(FVector::ZeroVector), ParkourTarget(FTransform::Identity), ParkourAnimationStartOffset(FTransform::Identity), ParkourActualStartOffset(FTransform::Identity) {}
+
+	FParkourSendData(FParkourAnimData InParkourAnimData, FVector InStartingOffset, FTransform InParkourTarget, FTransform InParkourAnimationStartOffset, FTransform InParkourActualStartOffset) : ParkourAnimData(InParkourAnimData), StartingOffset(InStartingOffset), ParkourTarget(InParkourTarget), ParkourAnimationStartOffset(InParkourAnimationStartOffset), ParkourActualStartOffset(InParkourActualStartOffset) {}
+};
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class K_YANGGAENG_API UParkourActorComponent : public UActorComponent
 {
@@ -175,6 +232,10 @@ public:
 	UFUNCTION()
 	void SetParkourCanCancelTime(const bool bCanCancel);
 
+	// Set parkour interacton & animation are finished.
+	UFUNCTION()
+	void ParkourIsFinished();
+
 	/**
 	* Parkour possiblility checked
 	*
@@ -210,6 +271,34 @@ public:
 	*	@return Is parkour animation stop successfully?
 	*/
 	bool ReverseParkour();
+
+	// =================================
+	// ======== RPC - To Server ========
+
+	//
+	UFUNCTION(Server, Reliable)
+	void ServerParkourTransformTimeline(const FParkourSendData& InParkourSendData);
+
+	// =================================
+	// ======== RPC - Multicast ========
+
+	//
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastParkourAnimationTimeline(const FParkourAnimData& InParkourAnimData);
+
+protected:
+
+	// =================================
+	// ======== RPC - To Server ========
+
+	// 
+	void ServerParkourTransformTimeline_Implementation(const FParkourSendData& InParkourSendData);
+
+	// =================================
+	// ======== RPC - Multicast ========
+
+	//
+	void MulticastParkourAnimationTimeline_Implementation(const FParkourAnimData& InParkourAnimData);
 
 private:
 
