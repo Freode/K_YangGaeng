@@ -56,6 +56,9 @@ UParkourActorComponent::UParkourActorComponent()
     // Constant initialization
     PARKOUR_DEBUG_DRAW_TIME = 1.0f;
     PARKOUR_DEBUG_TYPE = EDrawDebugTrace::Type::None;
+
+    // Replicate enable
+    SetIsReplicated(true);
 }
 
 
@@ -230,6 +233,10 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
     // Step 4. Calculate animation start offset because of parkour animation starting position
     ParkourAnimationStartOffset = CalculateParkourAnimationStartOffset();
 
+    // Create send data
+    FParkourAnimData ParkourAnimData = FParkourAnimData(InParkourType, ParkourParams.StartingPosition, ParkourParams.PlayRate);
+    FParkourSendData ParkourSendData = FParkourSendData(ParkourAnimData, ParkourParams.StartingOffset, ParkourTarget, ParkourAnimationStartOffset, ParkourActualStartOffset);
+
     // === Test Log ===
     //K_YG_UELOG(Warning, TEXT("Parkour Height : %f"), InParkourHeight);
     //K_YG_UELOG(Warning, TEXT("Target Transform : %s"), *ParkourTarget.ToString());
@@ -237,12 +244,14 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
     //K_YG_UELOG(Warning, TEXT("Parkour Actual Start Offset : %s"), *ParkourActualStartOffset.ToString());
     //K_YG_UELOG(Warning, TEXT("Parkour Animation Start Offset : %s"), *ParkourAnimationStartOffset.ToString());
  
-    // Step 5. Set character not movable
-    Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-    // Step 6. Parkour timeline operate
-    PlayParkourTimeline();
-    // Step 7. Parkour animation play
-    bool bIsPlayParkour = PlayParkourAnimation();
+    //// Step 5. Set character not movable
+    //Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+    //// Step 6. Parkour timeline operate
+    //PlayParkourTimeline();
+    //// Step 7. Parkour animation play
+    //bool bIsPlayParkour = PlayParkourAnimation();
+
+    ServerParkourTransformTimeline(ParkourSendData);
 
     return true;
 }
@@ -296,6 +305,50 @@ bool UParkourActorComponent::ReverseParkour()
     ParkourTimeline->Reverse();
 
     return true;
+}
+
+//
+void UParkourActorComponent::ServerParkourTransformTimeline_Implementation(const FParkourSendData& InParkourSendData)
+{
+    // Step 5. Set character not movable
+    CheckPlayerCharacter();
+    Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
+    // 
+    FParkourAssetSetting ParkourAssetSetting = GetParkourAssetSetting(InParkourSendData.ParkourAnimData.ParkourType);
+
+    // Setting parkour variables
+    ParkourParams.AnimMontage = ParkourAssetSetting.AnimMontage;
+    ParkourParams.PositionAndCorrectionCurve = ParkourAssetSetting.PositionAndCorrectionCurve;
+    ParkourParams.PlayRate = InParkourSendData.ParkourAnimData.PlayRate;
+    ParkourParams.StartingOffset = InParkourSendData.StartingOffset;
+    ParkourParams.StartingPosition = InParkourSendData.ParkourAnimData.StartingPosition;
+
+    ParkourTarget = InParkourSendData.ParkourTarget;
+    ParkourActualStartOffset = InParkourSendData.ParkourActualStartOffset;
+    ParkourAnimationStartOffset = InParkourSendData.ParkourAnimationStartOffset;
+
+    // Step 6. Send data which is parkour animation variables to all clients
+    MulticastParkourAnimationTimeline(InParkourSendData.ParkourAnimData);
+
+    // Step 7. Parkour timeline operate
+    PlayParkourTimeline();
+}
+
+//
+void UParkourActorComponent::MulticastParkourAnimationTimeline_Implementation(const FParkourAnimData& InParkourAnimData)
+{
+    // 
+    CheckPlayerCharacter();
+    FParkourAssetSetting ParkourAssetSetting = GetParkourAssetSetting(InParkourAnimData.ParkourType);
+
+    // Set parkour params 
+    ParkourParams.AnimMontage = ParkourAssetSetting.AnimMontage;
+    ParkourParams.PlayRate = InParkourAnimData.PlayRate;
+    ParkourParams.StartingPosition = InParkourAnimData.StartingPosition;
+
+    // Step 7. Parkour animation play
+    bool bIsPlayParkour = PlayParkourAnimation();
 }
 
 /**
@@ -672,9 +725,6 @@ void UParkourActorComponent::ParkourTimelineEnd()
 
     // Set character movable
     Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-
-    // Set parkour animation is not playing state
-    bIsPlayingParkour = false;
 }
 
 // Update Parkour Character Step 2. Get each curve's alpha data with parkour timeline progress position
@@ -736,4 +786,11 @@ void UParkourActorComponent::GetLerpedCurrentPlayerTransform(const float& InPosi
 void UParkourActorComponent::SetParkourCanCancelTime(const bool bCanCancel)
 {
     bIsPossibleCancelParkour = bCanCancel;
+}
+
+// Set parkour interacton & animation are finished.
+void UParkourActorComponent::ParkourIsFinished()
+{
+    // Set parkour animation is not playing state
+    bIsPlayingParkour = false;
 }
