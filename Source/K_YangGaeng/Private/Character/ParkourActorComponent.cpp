@@ -220,9 +220,6 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
 {
     // Step 0. Set parkour animation is playing state
     bIsPlayingParkour = true;
-    
-    // Step 0. Get initial position
-    ParkourStartLocation = Character->GetActorLocation();
 
     // Step 1. Create parkour params by parkour type
     ParkourParams = CreateParkourParams(InParkourType, InParkourHeight);
@@ -233,8 +230,8 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
     // Step 4. Calculate animation start offset because of parkour animation starting position
     ParkourAnimationStartOffset = CalculateParkourAnimationStartOffset();
 
-    // Create send data
-    FParkourAnimData ParkourAnimData = FParkourAnimData(InParkourType, ParkourParams.StartingPosition, ParkourParams.PlayRate);
+    // Step 5. Create send data
+    FParkourAnimData ParkourAnimData = FParkourAnimData(InParkourType, ParkourParams.StartingPosition, ParkourParams.PlayRate, ParkourTarget.GetRotation().Rotator());
     FParkourSendData ParkourSendData = FParkourSendData(ParkourAnimData, ParkourParams.StartingOffset, ParkourTarget, ParkourAnimationStartOffset, ParkourActualStartOffset);
 
     // === Test Log ===
@@ -243,14 +240,8 @@ bool UParkourActorComponent::StartParkour(const float& InParkourHeight, const FT
     //K_YG_UELOG(Warning, TEXT("Parkour Wall Component : %s"), *InParkourWallComponent->GetName());
     //K_YG_UELOG(Warning, TEXT("Parkour Actual Start Offset : %s"), *ParkourActualStartOffset.ToString());
     //K_YG_UELOG(Warning, TEXT("Parkour Animation Start Offset : %s"), *ParkourAnimationStartOffset.ToString());
- 
-    //// Step 5. Set character not movable
-    //Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-    //// Step 6. Parkour timeline operate
-    //PlayParkourTimeline();
-    //// Step 7. Parkour animation play
-    //bool bIsPlayParkour = PlayParkourAnimation();
 
+    // Step 6. Send parkours data to server
     ServerParkourTransformTimeline(ParkourSendData);
 
     return true;
@@ -266,24 +257,7 @@ bool UParkourActorComponent::StopParkour()
     // When is not playing parkour, return 
     K_YG_SIMPLE_CHECK(bIsPlayingParkour == true, false);
 
-    // Stop parkour animation
-    ParkourTimeline->Stop();
-    bIsPlayingParkour = false;
-    bIsPossibleCancelParkour = false;
-
-    // Reset player character location
-    float ResetZLocation = Character->GetMesh()->GetComponentLocation().Z;
-    FVector ResetCharacterLocation = FVector(ParkourStartLocation.X, ParkourStartLocation.Y, ResetZLocation);
-    Character->GetRootComponent()->SetWorldLocation(ResetCharacterLocation);
-
-    // Checking player character's anim instance is valid
-    UAnimInstance* CharacterAnimInstance = Character->GetMesh()->GetAnimInstance();
-    K_YG_SIMPLE_CHECK(CharacterAnimInstance != nullptr, false);
-
-    // Play parkour anim montage
-    CharacterAnimInstance->Montage_Stop(0.0f, PlayingParkourAnimMontage);
-
-    ParkourTimelineEnd();
+    ServerStopParkourInteraction();
     
     return true;
 }
@@ -307,14 +281,28 @@ bool UParkourActorComponent::ReverseParkour()
     return true;
 }
 
-//
+// To Server - Send parkour's interaction data
 void UParkourActorComponent::ServerParkourTransformTimeline_Implementation(const FParkourSendData& InParkourSendData)
 {
-    // Step 5. Set character not movable
+    // Step 7. Set character not movable
     CheckPlayerCharacter();
     Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 
-    // 
+    // Step 8. Send parkour data to all clients and server
+    MulticastParkourTransformTimeline(InParkourSendData);
+}
+
+// To Server - Stop parkour's interaction
+void UParkourActorComponent::ServerStopParkourInteraction_Implementation()
+{
+    MulticastStopParkourInteraction();
+}
+
+// Multicast - Send parkour's interaction data to all device
+void UParkourActorComponent::MulticastParkourTransformTimeline_Implementation(const FParkourSendData& InParkourSendData)
+{
+    // Step 9. Get parkour asset setting data by parkour type
+    CheckPlayerCharacter();
     FParkourAssetSetting ParkourAssetSetting = GetParkourAssetSetting(InParkourSendData.ParkourAnimData.ParkourType);
 
     // Setting parkour variables
@@ -328,27 +316,46 @@ void UParkourActorComponent::ServerParkourTransformTimeline_Implementation(const
     ParkourActualStartOffset = InParkourSendData.ParkourActualStartOffset;
     ParkourAnimationStartOffset = InParkourSendData.ParkourAnimationStartOffset;
 
-    // Step 6. Send data which is parkour animation variables to all clients
-    MulticastParkourAnimationTimeline(InParkourSendData.ParkourAnimData);
+    // Step 10. Get initial parkour position
+    ParkourStartLocation = Character->GetActorLocation();
 
-    // Step 7. Parkour timeline operate
+    // Step 11. Parkour timeline operate - It operates all clients & server because location update period difference in client & server
+    // So It needs to interpolate the character's location when character operates parkour interaction
     PlayParkourTimeline();
+
+    // Step 12. Parkour animation plays only client side because it isn't operated on server side
+    if (Character->HasAuthority() == false)
+    {
+        // Step 11. Parkour animation play
+        bool bIsPlayParkour = PlayParkourAnimation();
+    }
 }
 
-//
-void UParkourActorComponent::MulticastParkourAnimationTimeline_Implementation(const FParkourAnimData& InParkourAnimData)
+// Multicast - Stop parkour's interaction
+void UParkourActorComponent::MulticastStopParkourInteraction_Implementation()
 {
-    // 
-    CheckPlayerCharacter();
-    FParkourAssetSetting ParkourAssetSetting = GetParkourAssetSetting(InParkourAnimData.ParkourType);
+    // Stop parkour animation
+    ParkourTimeline->Stop();
+    bIsPlayingParkour = false;
+    bIsPossibleCancelParkour = false;
 
-    // Set parkour params 
-    ParkourParams.AnimMontage = ParkourAssetSetting.AnimMontage;
-    ParkourParams.PlayRate = InParkourAnimData.PlayRate;
-    ParkourParams.StartingPosition = InParkourAnimData.StartingPosition;
+    // Reset player character location
+    float ResetZLocation = Character->GetMesh()->GetComponentLocation().Z;
+    FVector ResetCharacterLocation = FVector(ParkourStartLocation.X, ParkourStartLocation.Y, ResetZLocation);
+    Character->GetRootComponent()->SetWorldLocation(ResetCharacterLocation);
 
-    // Step 7. Parkour animation play
-    bool bIsPlayParkour = PlayParkourAnimation();
+    // Checking player character's anim instance is valid
+    UAnimInstance* CharacterAnimInstance = Character->GetMesh()->GetAnimInstance();
+    K_YG_SIMPLE_CHECK(CharacterAnimInstance != nullptr);
+
+    if (Character->HasAuthority() == false)
+    {
+        // Stop parkour anim montage
+        CharacterAnimInstance->Montage_Stop(0.0f, PlayingParkourAnimMontage);
+    }
+
+    // Timeline abort
+    ParkourTimelineEnd();
 }
 
 /**
