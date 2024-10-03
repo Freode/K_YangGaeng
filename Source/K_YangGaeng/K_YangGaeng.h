@@ -54,7 +54,7 @@ inline FString GetClientIdentifier()
             UWorld* World = WorldContext.World();
 
             // If current controller is server, return server text
-            if (World->IsServer())
+            if (World->GetNetMode() == NM_DedicatedServer)
             {
                 CachedClientIdentifier = FString("Server");
                 return CachedClientIdentifier;
