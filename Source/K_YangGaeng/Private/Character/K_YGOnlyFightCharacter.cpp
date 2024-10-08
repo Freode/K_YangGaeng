@@ -317,6 +317,7 @@ void AK_YGOnlyFightCharacter::BeginPlay()
 	//SpawnedGun = WeaponComponent->GetCurrentSelectWeapon();
 	SpawnedGun = WeaponComponent->GetWeapon(EWeapon::NONE);
 	SpawnedGun->SetCameraComponent(CameraComponent);
+	WeaponComponent->SetSpawnedGun(SpawnedGun);
 	SpawnedGun->SetCollisionOverlap();
 }
 
