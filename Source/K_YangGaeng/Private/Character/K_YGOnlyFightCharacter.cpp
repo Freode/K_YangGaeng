@@ -83,6 +83,10 @@ AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 	InputCustomComponent->OnInputStartAim.BindUObject(WeaponComponent, &UWeaponActorComponent::EnterZoom);
 	InputCustomComponent->OnInputStopAim.BindUObject(WeaponComponent, &UWeaponActorComponent::ExitZoom);
 
+	// Weapon item(inventory) select binding 
+	InputCustomComponent->OnInputNum1.BindUObject(WeaponComponent, &UWeaponActorComponent::SelectMainWeapon);
+	InputCustomComponent->OnInputNum2.BindUObject(WeaponComponent, &UWeaponActorComponent::SelectSubWeapon);
+
 
 	// === Animation custom setting ===
 	SKMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -315,7 +319,7 @@ void AK_YGOnlyFightCharacter::BeginPlay()
 	// Create weapon object 
 	// Set which gun will spawn
 	//SpawnedGun = WeaponComponent->GetCurrentSelectWeapon();
-	SpawnedGun = WeaponComponent->GetWeapon(EWeapon::NONE);
+	SpawnedGun = WeaponComponent->HoldWeapon(NewObject<AK_YGGun>());
 	SpawnedGun->SetCameraComponent(CameraComponent);
 	WeaponComponent->SetSpawnedGun(SpawnedGun);
 	SpawnedGun->SetCollisionOverlap();
