@@ -305,6 +305,11 @@ float AK_YGOnlyFightCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 	return DamageAmount;
 }
 
+void AK_YGOnlyFightCharacter::SetWeaponState(EWeapon Weaponkind)
+{
+	CurrentAnim->SetAnimWeaponState(Weaponkind);
+}
+
 void AK_YGOnlyFightCharacter::BeginPlay()
 {
 	Super::BeginPlay();
