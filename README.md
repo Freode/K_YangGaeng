@@ -30,8 +30,8 @@
 
 팀원 Git 링크
 - 김연경 : https://github.com/yeonkyeong1022
-- 김민재 :
-- 곽경호 :
+- 김민재 : https://github.com/FineDust1598
+- 곽경호 : https://github.com/gwag-gyeongho
 
 
 ## 언어
