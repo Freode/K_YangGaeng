@@ -88,22 +88,37 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 ![본인 역할](https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/ReadMe_Image_7.png)
 
 
+### 기획
+- 구현해야할 기능 목록을 정리하고 어떤 로직으로 구성되는지 예상하는 기획안 작성
+기획안 페이지 : 
+
+
 ### Component 구조 적용
+- Unreal Engine의 Static Mesh Component, Skeletal Mesh Component처럼 다른 클래스에 쉽게 연동할 수 있도록 결합도를 낮춘 Component 디자인 패턴을 적용 시도
+- Delegate 사용
 
 
 ### 캐릭터 이동
+- 캐릭터 이동과 관련된 기능을 구현
+1. WASD키로 캐릭터 이동
+2. Ctrl키로 캐릭터 앉기
+3. 마우스로 캐릭터 시점 처리
 
 
-### 시점 처리
+### 시점 세부 처리
+- 캐릭터의 이동이 없는 경우, 카메라 상하좌우 위치에 따라 캐릭터의 바라보는 방향을 세부적으로 처리
 
 
 ### 파쿠르
+- 'Advanced Locomotion System V2'의 파쿠르를 모티브로 특정 높이 이하일 때, 캐릭터가 올라갈 수 있도록 구현
 
 
 ### 총기 연동 - Aim Offset
+- 다양한 총기 기능에 대한 애니메이션 상호작용이 이뤄지도록 Animation Blueprint에서 State Machine에서 구현
 
 
 ### 대쉬 스킬
+- 'Lyra Project'의 대쉬 이동을 모티브로 사용자의 WASD키와 Shift키를 누를 경우, 해당 방향으로 고속 이동하도록 구현
 
 
 ## 시연 영상
