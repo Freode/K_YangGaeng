@@ -90,7 +90,8 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 ### 기획
 - 구현해야할 기능 목록을 정리하고 어떤 로직으로 구성되는지 예상하는 기획안 작성
-기획안 페이지 : 
+- Unreal Engine의 무료 프로젝트인 'Lyra Project', 'Advanced Locomotion System V2'와 게임으로 출시된 'Play Unknown's BattleGround', 'Counter-Strike Online'의 일부분을 모티브, 레퍼런스로 활용해서 기획
+기획안 페이지 : https://www.notion.so/7-8-c224a63038304dbb85ea3f5cf0149167?pvs=4
 
 
 ### Component 구조 적용
