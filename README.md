@@ -120,7 +120,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 
 ### 대쉬 스킬
-![대쉬 스킬 플로우 차트](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_3.png)
+<img src="https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_3.png" width="500">
 - 'Lyra Project'의 대쉬 이동을 모티브로 사용자의 WASD키와 Shift키를 누를 경우, 해당 방향으로 고속 이동하도록 구현
 
 
