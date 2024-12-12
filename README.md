@@ -52,28 +52,28 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
   <tr>
     <td style="text-align: center;">
       <figure>
-        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_5.png?raw=true" alt="Image 8" width="500">
-        <figcaption>Github 협업 사진</figcaption>
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_8.png?raw=true" alt="Image 8" width="500">
+        <figcaption>Notion : 기획서 목차</figcaption>
       </figure>
     </td>
     <td>
       <figure>
-        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_6.png?raw=true" alt="Image 9" width="500">
-        <figcaption>Notion : 명세서 작성</figcaption>
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_10.png?raw=true" alt="Image 10" width="500">
+        <figcaption>Notion : 참고 애셋</figcaption>
       </figure>
     </td>
   </tr>
   <tr>
     <td style="text-align: center;">
       <figure>
-        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_7.png?raw=true" alt="Image 10" width="500">
-        <figcaption>Notion : Backlog 정리</figcaption>
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_7.png?raw=true" alt="Image 7" width="500">
+        <figcaption>Notion : 무기 기능 기획서 작성</figcaption>
       </figure>
     </td>
     <td>
       <figure>
-        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_4.png?raw=true" alt="Image 11" width="500">
-        <figcaption>Figma : 와이어 프레임 작성</figcaption>
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_11.png?raw=true" alt="Image 11" width="500">
+        <figcaption>Notion : 이동 기능 기획서 작성</figcaption>
       </figure>
     </td>
   </tr>
