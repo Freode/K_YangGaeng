@@ -72,7 +72,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
     </td>
     <td>
       <figure>
-        <img src = "https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/ReadMe_Image_4.png?raw=true" alt="Image 11" width="500">
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_4.png?raw=true" alt="Image 11" width="500">
         <figcaption>Figma : 와이어 프레임 작성</figcaption>
       </figure>
     </td>
