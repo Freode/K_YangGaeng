@@ -52,13 +52,13 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
   <tr>
     <td style="text-align: center;">
       <figure>
-        <img src = "https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/ReadMe_Image_1.png?raw=true" alt="Image 1" width="500">
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_5.png?raw=true" alt="Image 5" width="500">
         <figcaption>Github 협업 사진</figcaption>
       </figure>
     </td>
     <td>
       <figure>
-        <img src = "https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/ReadMe_Image_2.png?raw=true" alt="Image 2" width="500">
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_6.png?raw=true" alt="Image 6" width="500">
         <figcaption>Notion : 명세서 작성</figcaption>
       </figure>
     </td>
@@ -66,7 +66,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
   <tr>
     <td style="text-align: center;">
       <figure>
-        <img src = "https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/ReadMe_Image_3.png?raw=true" alt="Image 1" width="500">
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_7.png?raw=true" alt="Image 7" width="500">
         <figcaption>Notion : Backlog 정리</figcaption>
       </figure>
     </td>
@@ -81,11 +81,11 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 
 ## 플로우 차트
-![플로우 차트](https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/ReadMe_Image_6.png)
+![플로우 차트](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_1.png)
 
 
 ## 본인 역할
-![본인 역할](https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/ReadMe_Image_7.png)
+![본인 역할](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_4.png)
 
 
 ### 기획
@@ -111,6 +111,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 
 ### 파쿠르
+![파쿠르 플로우 차트](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_2.png)
 - 'Advanced Locomotion System V2'의 파쿠르를 모티브로 특정 높이 이하일 때, 캐릭터가 올라갈 수 있도록 구현
 
 
@@ -119,6 +120,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 
 ### 대쉬 스킬
+![대쉬 스킬 플로우 차트](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_3.png)
 - 'Lyra Project'의 대쉬 이동을 모티브로 사용자의 WASD키와 Shift키를 누를 경우, 해당 방향으로 고속 이동하도록 구현
 
 
