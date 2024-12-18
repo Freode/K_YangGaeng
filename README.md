@@ -2,7 +2,7 @@
 Unreal Engine 5 기반으로 제작한 멀티플레이 TPS 게임 제작 프로젝트
 
 
-<img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaeng_Title_Image.png?raw=true" alt="Image 9" width="500">
+<img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaneg_Title_Image.png?raw=true" alt="Image 9" width="500">
 
 
 ## 요약
@@ -177,7 +177,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 
 ## 시연 영상
-[![시연 영상](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaeng_Title_Image.png)](https://youtu.be/f4ixF1Mcdbc)
+[![시연 영상](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaneg_Title_Image.png)](https://youtu.be/f4ixF1Mcdbc)
 - 클릭하시면, 시연 영상으로 이동합니다.
 
 
