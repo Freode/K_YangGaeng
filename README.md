@@ -85,7 +85,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 
 ## 본인 역할
-![본인 역할](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_4.png)
+![본인 역할](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaeng_DevelopmentPart.png)
 
 
 캐릭터 이동, 파쿠르, 대쉬 스킬 등의 캐릭터 파트와 캐릭터 애니메이션 블루프린트에 총기를 사용할 수 있도록 Aim Offset을 추가하는 파트까지 담당했습니다.
