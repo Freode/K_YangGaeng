@@ -21,8 +21,6 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 - 곽경호 : 팀원 - 게임 내부 UI
 - 김민재 : 팀원 - 로비 및 방 관련 UI
 
-<img src = "" alt="Image 5" width="1200">
-
 
 - 비중 : FE(35%), BE(35%), 기획(35%)
 
@@ -99,7 +97,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 ### Component 구조 적용
 - Unreal Engine의 Static Mesh Component, Skeletal Mesh Component처럼 다른 클래스에 쉽게 연동할 수 있도록 결합도를 낮춘 Component 디자인 패턴을 적용 시도
-- Delegate 사용
+- Delegate 사용해 Component간 결합도를 낮추기 위해 노력했습니다.
 
 
 ### 캐릭터 이동 & Dedicated Server 적용
