@@ -108,7 +108,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
       </figure>
     </td>
     <td>
-      <img src = "" alt="" width="500">
+      <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaeng_GIF_Locomotion.gif?raw=true" alt="GIF Locomotion" width="500">
     </td>
   </tr>
 </table>
@@ -123,11 +123,11 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
   <tr>
     <td>
       <figure>
-        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaneg_AimOffset_Image.png?raw=true" alt="Image 13" width="500">
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaeng_GIF_AimOffset_Idle.gif?raw=true" alt="GIF AimOffset Idle" width="500">
       </figure>
     </td>
     <td>
-      <img src = "" alt="" width="500">
+      <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaeng_GIF_AimOffset_Sit.gif?raw=true" alt="GIF AimOffset Sit" width="500">
     </td>
   </tr>
 </table>
@@ -143,7 +143,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
       </figure>
     </td>
     <td>
-      <img src = "" alt="" width="500">
+      <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaeng_GIF_Parkour.gif?raw=true" alt="GIF Parkour" width="500">
     </td>
   </tr>
 </table>
@@ -154,7 +154,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 
 ### 총기 연동
-- 다양한 총기 기능에 대한 애니메이션 상호작용이 이뤄지도록 Animation Blueprint에서 State Machine에서 구현
+- 다양한 총기 기능에 대한 애니메이션 상호작용이 이뤄지도록 Animation Blueprint에서 State Machine에서 틀을 구현
 
 
 ### 대쉬 스킬
@@ -166,7 +166,7 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
       </figure>
     </td>
     <td>
-      <img src = "" alt="" width="500">
+      <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaeng_GIF_DashSkill.gif?raw=true" alt="GIF DashSkill" width="500">
     </td>
   </tr>
 </table>
