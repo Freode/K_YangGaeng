@@ -99,7 +99,19 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 - Delegate 사용
 
 
-### 캐릭터 이동
+### 캐릭터 이동 & Dedicated Server 적용
+<table>
+  <tr>
+    <td>
+      <figure>
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaneg_Dedicated_Image.png?raw=true" alt="Image 12" width="500">
+      </figure>
+    </td>
+    <td>
+      <img src = "" alt="" width="500">
+    </td>
+  </tr>
+</table>
 - 캐릭터 이동과 관련된 기능을 구현
 1. WASD키로 캐릭터 이동
 2. Ctrl키로 캐릭터 앉기
@@ -107,25 +119,65 @@ Unreal Engine으로 게임 제작을 희망하는 학술동아리 학우들과 �
 
 
 ### 시점 세부 처리
+<table>
+  <tr>
+    <td>
+      <figure>
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaneg_AimOffset_Image.png?raw=true" alt="Image 13" width="500">
+      </figure>
+    </td>
+    <td>
+      <img src = "" alt="" width="500">
+    </td>
+  </tr>
+</table>
 - 캐릭터의 이동이 없는 경우, 카메라 상하좌우 위치에 따라 캐릭터의 바라보는 방향을 세부적으로 처리
 
 
 ### 파쿠르
+<table>
+  <tr>
+    <td>
+      <figure>
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaneg_Parkour_Image.png?raw=true" alt="Image 13" width="500">
+      </figure>
+    </td>
+    <td>
+      <img src = "" alt="" width="500">
+    </td>
+  </tr>
+</table>
+
+
 ![파쿠르 플로우 차트](https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_2.png)
 - 'Advanced Locomotion System V2'의 파쿠르를 모티브로 특정 높이 이하일 때, 캐릭터가 올라갈 수 있도록 구현
 
 
-### 총기 연동 - Aim Offset
+### 총기 연동
 - 다양한 총기 기능에 대한 애니메이션 상호작용이 이뤄지도록 Animation Blueprint에서 State Machine에서 구현
 
 
 ### 대쉬 스킬
+<table>
+  <tr>
+    <td>
+      <figure>
+        <img src = "https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/K_YangGaneg_Dash_Image.png?raw=true" alt="Image 14" width="500">
+      </figure>
+    </td>
+    <td>
+      <img src = "" alt="" width="500">
+    </td>
+  </tr>
+</table>
+
+
 <img src="https://github.com/Freode/K_YangGaeng/blob/main/ReadMeImage/ReadMe_Image_3.png" width="800">
 - 'Lyra Project'의 대쉬 이동을 모티브로 사용자의 WASD키와 Shift키를 누를 경우, 해당 방향으로 고속 이동하도록 구현
 
 
 ## 시연 영상
-[![시연 영상](https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/ReadMe_Image_8.png)](https://youtu.be/PYpVsFuc190)
+[![시연 영상](https://github.com/Freode/SketchQuizGame/blob/main/ReadMeImage/K_YangGaeng_Title_Image.png)](https://youtu.be/f4ixF1Mcdbc)
 - 클릭하시면, 시연 영상으로 이동합니다.
 
 
