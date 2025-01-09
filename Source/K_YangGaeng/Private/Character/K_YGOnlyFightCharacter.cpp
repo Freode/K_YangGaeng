@@ -16,6 +16,8 @@
 #include "UI/HealthBar/K_YGHealthBarManager.h" 
 #include "UI/HealthBar/HealthBarComponent.h"
 #include "UI/HealthBar/K_YGHPBarWidget.h"
+#include "UI/GunInterface/GunInterfaceComponent.h"
+#include "UI/GunInterface/K_YGGunInterfaceWidget.h"
 
 AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 {
@@ -34,15 +36,12 @@ AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 	{
 		SKMesh->SetSkeletalMesh(CHARACTERMESH.Object);
 	}
+	 
 
-	//if (IsLocallyControlled())
-	//{
-	//	// Initialize the HealthBarComponent 
-	//	HealthBar = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HPBARWIDGET"));
-	//}
-
-	// Initialize the HealthBarComponent 
+	// Initialize widget component
 	HealthBar = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HPBARWIDGET"));
+	GunInterface = CreateDefaultSubobject<UGunInterfaceComponent>(TEXT("GUNINTERFACEWIDGET"));
+
 
 	// Configure detail character's skeletal mesh component
 	SKMesh->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
@@ -309,7 +308,7 @@ void AK_YGOnlyFightCharacter::SetWeaponState(EWeapon Weaponkind)
 {
 	CurrentAnim->SetAnimWeaponState(Weaponkind);
 }
-
+  
 void AK_YGOnlyFightCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -326,6 +325,10 @@ void AK_YGOnlyFightCharacter::BeginPlay()
 	// Create weapon object 
 	// Set which gun will spawn
 	//SpawnedGun = WeaponComponent->GetCurrentSelectWeapon();
+	if (GunInterface)
+	{
+		WeaponComponent->SetGunInterfaceWidget(GunInterface);
+	}
 	SpawnedGun = WeaponComponent->HoldWeapon(NewObject<AK_YGGun>());
 	SpawnedGun->SetCameraComponent(CameraComponent);
 	WeaponComponent->SetCameraComponent(CameraComponent);
