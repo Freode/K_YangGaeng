@@ -11,13 +11,13 @@
 #include "Character/OnlyFightAnimActorComponent.h"
 #include "AI/K_YGAIController.h"
 #include "Weapon/WeaponActorComponent.h"
-#include "Weapon/K_YGGun.h"
-#include "Weapon/ItemComponent.h"
+#include "Weapon/K_YGGun.h" 
 #include "UI/HealthBar/K_YGHealthBarManager.h" 
 #include "UI/HealthBar/HealthBarComponent.h"
 #include "UI/HealthBar/K_YGHPBarWidget.h"
 #include "UI/GunInterface/GunInterfaceComponent.h"
 #include "UI/GunInterface/K_YGGunInterfaceWidget.h"
+#include "UI/ShopSystem/ShopComponent.h"
 
 AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 {
@@ -39,8 +39,12 @@ AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 	 
 
 	// Initialize widget component
+	// HP Bar widget 
 	HealthBar = CreateDefaultSubobject<UHealthBarComponent>(TEXT("HPBARWIDGET"));
+	// Gun Interface (display weaon info)
 	GunInterface = CreateDefaultSubobject<UGunInterfaceComponent>(TEXT("GUNINTERFACEWIDGET"));
+	// Shop widget
+	ShopSystem = CreateDefaultSubobject<UShopComponent>(TEXT("SHOPWIDGET"));
 
 
 	// Configure detail character's skeletal mesh component
@@ -50,9 +54,7 @@ AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 	// When component begins CreateDefaultSubobject, the initialization function call immediately
 	CameraComponent = CreateDefaultSubobject<UCameraActorComponent>(TEXT("Camera"));
 	CameraComponent->ChangeViewMode(EViewMode::THIRD_PERSON);
-
-	// Item (Inventory) componnet
-	ItemComponent = CreateDefaultSubobject<UItemComponent>(TEXT("Item"));
+	 
 
 	// Create custom input component
 	InputCustomComponent = CreateDefaultSubobject<UOnlyFightInputAComponent>(TEXT("InputCustom"));
@@ -64,6 +66,7 @@ AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 	InputCustomComponent->OnInputSit.BindUObject(this, &AK_YGOnlyFightCharacter::InputSit);
 	InputCustomComponent->OnInputMouseViewChange.BindUObject(this, &AK_YGOnlyFightCharacter::InputLook);
 	InputCustomComponent->OnInputDashSkill.BindUObject(this, &AK_YGOnlyFightCharacter::InputDashSkill);
+	ShopSystem->SetupInputComponent(InputCustomComponent);
 
 	// === Parkour system custom component ===
 	ParkourComponent = CreateDefaultSubobject<UParkourActorComponent>(TEXT("ParkourSystem"));
@@ -119,6 +122,7 @@ AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 	// AI Setting
 	AIControllerClass = AK_YGAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
 }
 
 // Tick Event
@@ -307,6 +311,11 @@ float AK_YGOnlyFightCharacter::TakeDamage(float DamageAmount, FDamageEvent const
 void AK_YGOnlyFightCharacter::SetWeaponState(EWeapon Weaponkind)
 {
 	CurrentAnim->SetAnimWeaponState(Weaponkind);
+}
+
+bool AK_YGOnlyFightCharacter::PutWepaon(EWeapon InWeaponKind)
+{ 
+	return WeaponComponent->StuffWeaponIsList(InWeaponKind);
 }
   
 void AK_YGOnlyFightCharacter::BeginPlay()
