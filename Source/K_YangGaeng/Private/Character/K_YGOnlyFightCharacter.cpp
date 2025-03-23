@@ -88,6 +88,7 @@ AK_YGOnlyFightCharacter::AK_YGOnlyFightCharacter()
 	// Weapon item(inventory) select binding 
 	InputCustomComponent->OnInputNum1.BindUObject(WeaponComponent, &UWeaponActorComponent::SelectNum1);
 	InputCustomComponent->OnInputNum2.BindUObject(WeaponComponent, &UWeaponActorComponent::SelectNum2);
+	InputCustomComponent->OnInputNum3.BindUObject(WeaponComponent, &UWeaponActorComponent::SelectNum3);
 	// Throw weapon away
 	InputCustomComponent->OnInputDrop.BindUObject(WeaponComponent, &UWeaponActorComponent::DropWeapon);
 
