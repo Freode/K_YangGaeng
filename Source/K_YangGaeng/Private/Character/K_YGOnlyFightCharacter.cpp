@@ -314,9 +314,9 @@ void AK_YGOnlyFightCharacter::SetWeaponState(EWeapon Weaponkind)
 	CurrentAnim->SetAnimWeaponState(Weaponkind);
 }
 
-bool AK_YGOnlyFightCharacter::PutWepaon(EWeapon InWeaponKind)
+bool AK_YGOnlyFightCharacter::PutWeapon(EWeapon InWeaponKind)
 { 
-	return WeaponComponent->StuffWeaponIsList(InWeaponKind);
+	return WeaponComponent->StuffWeaponInList(InWeaponKind);
 }
   
 void AK_YGOnlyFightCharacter::BeginPlay()
@@ -338,11 +338,11 @@ void AK_YGOnlyFightCharacter::BeginPlay()
 	if (GunInterface)
 	{
 		WeaponComponent->SetGunInterfaceWidget(GunInterface);
-	}
+	} 
 	SpawnedGun = WeaponComponent->HoldWeapon(NewObject<AK_YGGun>());
 	SpawnedGun->SetCameraComponent(CameraComponent);
 	WeaponComponent->SetCameraComponent(CameraComponent);
-	WeaponComponent->SetSpawnedGun(SpawnedGun);
+	WeaponComponent->SetSpawnedGun(SpawnedGun); 
 	SpawnedGun->SetCollisionOverlap();
 }
 
